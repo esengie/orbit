@@ -27,6 +27,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
@@ -35,37 +38,62 @@ public class DiskSpaceManager {
 
     private static final int MAX_SIZE = 1000000;
     private int mSize = 1;
-    private int firstFree = 1;
-    private int freePages;
-    private RandomAccessFile mFile;
-    private String fName;
-    private Page fPage;
-    private ByteBuffer swap;
 
-    public DiskSpaceManager() {
-        fPage = new Page(0);
-        swap = ByteBuffer.allocate(fPage.getSize());
-    }
+    private int freePages = 0;
+    private RandomAccessFile mFile;
+    private String fName;      // db name
+    private Page fPage;       // info page
 
     int allocatePage() {
+        // doesn't care about prev, maybe fix later
         if (mSize < MAX_SIZE || freePages > 0) {
-            if (0 == freePages){
-                freePages += 100;
-                mSize += 100;
+            int firstFree = 0;
+            try {
+                if (0 == freePages) {
+                    extendDb(10);
+                }
+                Page local = readPage(fPage.getNext());
+                firstFree = local.getId();
+                fPage.setNext(local.getNext());
+                --freePages;
+            } catch (IOException ex) {
+                throw new IllegalStateException("Read page error on allocate; allocate aborted", ex);
             }
-            //// 
             return firstFree;
         } else {
             throw new IllegalStateException("Not enough space left; allocate aborted");
         }
     }
+    private void extendDb(int num) throws IOException {
+        // updates free pool
+        freePages += num;
 
-    void deallocatePage(int pageId) {
+        fPage.setNext(mSize);
+        mFile.seek((long) (mSize * fPage.getSize()));
+        mFile.writeInt(0); // set Prev
+
+        for (int i = mSize + 1; i < mSize + num; ++i) {
+            mFile.writeInt(i);
+            mFile.seek((long) (i * fPage.getSize()));
+            mFile.writeInt(i);
+        }
+        mSize += num;
+        fPage.setPrev(mSize - 1);
+    }
+    void deallocatePage(int pageId) throws IOException {
         if (pageId > 0 && pageId < mSize) {
-            ++freePages;
+            try {
+                Page local = readPage(pageId);
+                local.setNext(fPage.getNext());
+                fPage.setNext(pageId);
+                writePage(local);
+                ++freePages;
+            } catch (IOException ex) {
+                throw new IllegalStateException("Error during deallocation ", ex);
+            }
 
         } else {
-            throw new IllegalArgumentException("Invalid deallocate; aborted");
+            throw new IllegalArgumentException("Invalid deallocate index out of bounds; aborted");
         }
     }
 
@@ -79,7 +107,6 @@ public class DiskSpaceManager {
             throw new IllegalArgumentException("Invalid page number; read aborted");
         }
     }
-
     void writePage(Page page) throws IOException {
         if (page.getId() >= 0 && page.getId() < mSize) {
             mFile.seek((long) (page.getId() * page.getSize()));
@@ -90,6 +117,28 @@ public class DiskSpaceManager {
 
     }
 
+    public void createDB(String f) {    // first page is reserved
+        fName = f;
+        try {
+            mFile = new RandomAccessFile(fName, "rw");  //open connection
+            fPage = readPage(0);
+//            allocatePage();   // create an info page
+//            writePage(fPage);
+        } catch (IOException except) {
+            System.out.println("Well, suck my dick then! (creating db)");
+        }
+    }
+    public void openDB(String f) {
+        // Need many error checks many many many!!!
+        fName = f;
+        mSize = 1;
+        try {
+            mFile = new RandomAccessFile(fName, "rw");
+            fPage = readPage(0);
+        } catch (IOException except) {
+            System.err.println("Well, suck my dick then! (opening db)");
+        }
+    }
     public void closeDB() {
         /// Write the control page
         try {
@@ -97,32 +146,9 @@ public class DiskSpaceManager {
             writePage(fPage);
             mFile.close();
         } catch (IOException ex) {
-            System.out.println("Well, suck my dick then! (flushing to disk before exit)");;
+            System.err.println("Well, suck my dick then! (flushing to disk before exit)");;
         }
     }
-
-    public void createDB(String f) {    // first page is reserved
-        fName = f;
-        try {
-            mFile = new RandomAccessFile(fName, "rw");
-            fPage.setNext(1);
-            writePage(fPage);
-            freePages = mSize - 1;
-        } catch (IOException except) {
-            System.out.println("Well, suck my dick then! (creating db)");
-        }
-    }
-
-    public void openDB(String f) {
-        fName = f;
-        try {
-            mFile = new RandomAccessFile(fName, "rw");
-            fPage = readPage(0);
-        } catch (IOException except) {
-            System.out.println("Well, suck my dick then! (opening db)");
-        }
-    }
-
     public void deleteDB() {
         closeDB();
         File var1 = new File(fName);

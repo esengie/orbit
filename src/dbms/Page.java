@@ -31,14 +31,18 @@ import java.util.BitSet;
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
 public class Page {
+    protected static final int PREV = 0;
+    protected static final int NEXT = 4;
+    protected static final int DELETED = 8;
+    protected static final int FREE = 9;
     protected static final int SIZE = 4096;
     private final int Id;
-    private int free = 4096 - 4 - 4 - 1 - 4; // prev next deleted free
+    private int free = 4096 - FREE - 4; // prev next deleted free
     protected ByteBuffer buff;
     Page(int id) {
         Id = id;
         buff = ByteBuffer.allocate(4096);
-        buff.position(17);
+        buff.position(FREE + 4);
     }
     void put(ByteBuffer src){
         buff.put(src);
@@ -53,19 +57,28 @@ public class Page {
         return SIZE;
     }
     private void updateFree(){
-        set(free, 9);
+        set(free, FREE);
     }
     private void set(int k, int pos){
         buff.putInt(pos, k);
     }
+    private int get(int pos){
+        return buff.getInt(pos);
+    }
     void setPrev(int k){
-        set(k, 0);
+        set(k, PREV);
+    }
+    int getPrev(){
+        return get(PREV);
     }
     void setNext(int k){
-        set(k, 4);
+        set(k, NEXT);
+    }
+    int getNext(){
+        return get(NEXT);
     }
     void setDeleted(){
         byte l = 1;
-        buff.put(5, l);
+        buff.put(DELETED, l);
     }    
 }

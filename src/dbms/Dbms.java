@@ -49,13 +49,14 @@ public class Dbms {
 }
     Dbms() throws IOException{
         f = new DiskSpaceManager();
-        f.openDB("atari");
+        f.openDB("atari.txt");
         int r = f.allocatePage();
         p = f.readPage(r);
         
         byte[] er = hexStringToByteArray("ffffffffffffffffffffff");
         p.buff.put(er);
         f.writePage(p);
+        f.deallocatePage(p.getId());
         f.closeDB();
     }
     public static void main(String[] args) {

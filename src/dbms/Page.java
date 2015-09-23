@@ -57,25 +57,25 @@ public class Page {
         return SIZE;
     }
     private void updateFree(){
-        set(free, FREE);
+        setInt(free, FREE);
     }
-    private void set(int k, int pos){
+    private void setInt(int k, int pos){
         buff.putInt(pos, k);
     }
-    private int get(int pos){
+    private int getInt(int pos){
         return buff.getInt(pos);
     }
     void setPrev(int k){
-        set(k, PREV);
+        setInt(k, PREV);
     }
     int getPrev(){
-        return get(PREV);
+        return getInt(PREV);
     }
     void setNext(int k){
-        set(k, NEXT);
+        setInt(k, NEXT);
     }
     int getNext(){
-        return get(NEXT);
+        return getInt(NEXT);
     }
     void setDeleted(){
         byte l = 1;

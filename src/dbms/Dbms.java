@@ -24,6 +24,8 @@
 package dbms;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,36 +33,47 @@ import java.util.logging.Logger;
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-
 public class Dbms {
+
     DiskSpaceManager f;
-    Page p;
+    BufferManager buf;
     /**
      * @param args the command line arguments
      */
     public static byte[] hexStringToByteArray(String s) {
-    int len = s.length();
-    byte[] data = new byte[len / 2];
-    for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                             + Character.digit(s.charAt(i+1), 16));
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
     }
-    return data;
-}
-    Dbms() throws IOException{
+
+    Dbms() throws IOException {
         f = new DiskSpaceManager();
-        f.openDB("atari.txt");
-        int r = f.allocatePage();
-        p = f.readPage(r);
-        
-        byte[] er = hexStringToByteArray("ffffffffffffffffffffff");
-        p.buff.put(er);
-        f.writePage(p);
-        f.deallocatePage(p.getId());
+        buf = new BufferManager(5);
+        buf.setManager(f);
+        f.createDB("atari.txt");
+        ArrayList<Integer> arr = new ArrayList<>();
+        byte[] er; Page p;
+        for (Integer i = 0; i < 7; ++i){
+            arr.add(f.allocatePage());
+            Integer temp = arr.get(i);
+            p = buf.getPage(temp);
+            String s = new String("fffffffffffffffffffffffffffffffffff" + i.toString());
+            er = hexStringToByteArray(s);
+            p.buff.put(er);
+            buf.setDirty(temp);
+            buf.unpin(temp);
+        }
+        buf.flushAll();
         f.closeDB();
+   
     }
+
     public static void main(String[] args) {
-        
+
         try {
             Dbms df = new Dbms();
             // TODO code application logic here
@@ -68,5 +81,5 @@ public class Dbms {
             Logger.getLogger(Dbms.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
 }

@@ -26,9 +26,6 @@ package dbms;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -44,7 +41,7 @@ public class DiskSpaceManager {
     private String fName;      // db name
     private Page fPage;       // info page
 
-    int allocatePage() {
+    public int allocatePage() {
         // doesn't care about prev, maybe fix later
         if (mSize < MAX_SIZE || freePages > 0) {
             int firstFree = 0;
@@ -80,7 +77,7 @@ public class DiskSpaceManager {
         mSize += num;
         fPage.setPrev(mSize - 1);
     }
-    void deallocatePage(int pageId) throws IOException {
+    public void deallocatePage(int pageId){
         if (pageId > 0 && pageId < mSize) {
             try {
                 Page local = readPage(pageId);
@@ -97,7 +94,7 @@ public class DiskSpaceManager {
         }
     }
 
-    Page readPage(int pageId) throws IOException {
+    protected Page readPage(int pageId) throws IOException {
         if (pageId >= 0 && pageId < mSize) {
             Page p = new Page(pageId);
             mFile.seek((long) (pageId * p.getSize()));
@@ -107,7 +104,7 @@ public class DiskSpaceManager {
             throw new IllegalArgumentException("Invalid page number; read aborted");
         }
     }
-    void writePage(Page page) throws IOException {
+    protected void writePage(Page page) throws IOException {
         if (page.getId() >= 0 && page.getId() < mSize) {
             mFile.seek((long) (page.getId() * page.getSize()));
             mFile.write(page.buff.array());
@@ -122,8 +119,6 @@ public class DiskSpaceManager {
         try {
             mFile = new RandomAccessFile(fName, "rw");  //open connection
             fPage = readPage(0);
-//            allocatePage();   // create an info page
-//            writePage(fPage);
         } catch (IOException except) {
             System.out.println("Well, suck my dick then! (creating db)");
         }

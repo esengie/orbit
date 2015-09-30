@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.DiskSpaceManager;
 
+import dbms.SettingsAndMeta.GlobalConsts;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -31,23 +32,22 @@ import java.io.RandomAccessFile;
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class DiskSpaceManager {
-
-    private static final int MAX_SIZE = 1000000;
+public class DiskSpaceManager extends GlobalConsts {
+    
     private int mSize = 1;
-
     private int freePages = 0;
+    
     private RandomAccessFile mFile;
     private String fName;      // db name
     private Page fPage;       // info page
 
     public int allocatePage() {
         // doesn't care about prev, maybe fix later
-        if (mSize < MAX_SIZE || freePages > 0) {
+        if (mSize < DBMS_FILE_MAX_SIZE || freePages > 0) {
             int firstFree = 0;
             try {
                 if (0 == freePages) {
-                    extendDb(10);
+                    extendDb(EXTEND_DB);
                 }
                 Page local = readPage(fPage.getNext());
                 firstFree = local.getId();
@@ -86,7 +86,7 @@ public class DiskSpaceManager {
                 fPage.setNext(pageId);
                 writePage(local);
                 ++freePages;
-            } catch (IOException ex) {
+            } catch (RuntimeException ex) {
                 throw new IllegalStateException("Error during deallocation ", ex);
             }
 
@@ -95,20 +95,28 @@ public class DiskSpaceManager {
         }
     }
 
-    protected Page readPage(int pageId) throws IOException {
+    public Page readPage(int pageId){
         if (pageId >= 0 && pageId < mSize) {
-            Page p = new Page(pageId);
-            mFile.seek((long) (pageId * p.getSize()));
-            mFile.read(p.buff.array());
-            return p;
+            try {
+                Page p = new Page(pageId);
+                mFile.seek((long) (pageId * p.getSize()));
+                mFile.read(p.buff.array());
+                return p;
+            } catch (IOException ex) {
+                throw new RuntimeException("Error while reading page");
+            }
         } else {
             throw new IllegalArgumentException("Invalid page number; read aborted");
         }
     }
-    protected void writePage(Page page) throws IOException {
+    public void writePage(Page page){
         if (page.getId() >= 0 && page.getId() < mSize) {
-            mFile.seek((long) (page.getId() * page.getSize()));
-            mFile.write(page.buff.array());
+            try {
+                mFile.seek((long) (page.getId() * page.getSize()));
+                mFile.write(page.buff.array());
+            } catch (IOException ex) {
+                throw new RuntimeException("Error while writing page");
+            }
         } else {
             throw new IllegalArgumentException("Invalid page number; write aborted");
         }
@@ -122,7 +130,7 @@ public class DiskSpaceManager {
             fPage = readPage(0);
             fPage.setInitialFree();
         } catch (IOException except) {
-            System.out.println("Well, suck my dick then! (creating db)");
+            throw new RuntimeException("Well, suck my dick then! (creating db)");
         }
     }
     public void openDB(String f) {
@@ -133,7 +141,7 @@ public class DiskSpaceManager {
             mFile = new RandomAccessFile(fName, "rw");
             fPage = readPage(0);
         } catch (IOException except) {
-            System.err.println("Well, suck my dick then! (opening db)");
+            throw new RuntimeException("Well, suck my dick then! (opening db)");
         }
     }
     public void closeDB() {
@@ -143,7 +151,7 @@ public class DiskSpaceManager {
             writePage(fPage);
             mFile.close();
         } catch (IOException ex) {
-            System.err.println("Well, suck my dick then! (flushing to disk before exit)");;
+            throw new RuntimeException("Well, suck my dick then! (flushing to disk before exit)");
         }
     }
     public void deleteDB() {

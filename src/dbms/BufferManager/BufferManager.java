@@ -21,9 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.BufferManager;
 
-import java.io.IOException;
+import dbms.DiskSpaceManager.Page;
+import dbms.DiskSpaceManager.DiskSpaceManager;
+import dbms.SettingsAndMeta.GlobalConsts;
 import static java.lang.Math.max;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +35,7 @@ import java.util.Map.Entry;
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class BufferManager {   ///singleton
+public class BufferManager extends GlobalConsts {   ///singleton
 
     private int nFrames;
     private Map<Integer, Boolean> dirty;
@@ -43,20 +45,20 @@ public class BufferManager {   ///singleton
     private LRUCache<Integer, Page> lru;
     DiskSpaceManager diskManager;
 
-    BufferManager(int n) {
+    public BufferManager(int n) {
         nFrames = n;
-        nPinned = max(nFrames / 20, 5);
+        nPinned = max(nFrames / BUFF_DEFAULT_PINNED_FRACTIONS, BUFF_DEFAULT_MIN_PAGES);
         dirty = new HashMap<>(nFrames);
         pinCount = new HashMap<>(nPinned);
         pageFrame = new HashMap<>(nPinned);
-        lru = new LRUCache<>(max(nFrames - nPinned, 5)); // Costyl
+        lru = new LRUCache<>(max(nFrames - nPinned, BUFF_DEFAULT_MIN_PAGES)); // Costyl
     }
 
-    BufferManager() {
-        this(200);
+    public BufferManager() {
+        this(BUFF_DEFAULT_PAGES);
     }
 
-    void setManager(DiskSpaceManager m) {
+    public void setManager(DiskSpaceManager m) {
         diskManager = m;
     }
 
@@ -73,7 +75,7 @@ public class BufferManager {   ///singleton
         lru.remove(pageId);
     }
 
-    public void unpin(int pageId) throws IOException {
+    public void unpin(int pageId) {
         if (pinCount.containsKey(pageId)) {
             Integer temp = pinCount.get(pageId);
             if (temp == 1) {
@@ -100,29 +102,29 @@ public class BufferManager {   ///singleton
         }
     }
 
-    protected void flushAll() {
+    public void flushAll() {
         try {
             for (Entry<Integer, Boolean> elem : dirty.entrySet()) {
                 diskManager.writePage(lru.get(elem.getKey()));
             }
-        } catch (IOException ex) {
-            System.err.println("Well, suck my dick then! (opening db)");
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Well, suck my dick then! (flushing buffer)");
         }
     }
 
-    public Page getPage(int pageId) throws IOException {
-        if (lru.containsKey(pageId)) {
-            pageFrame.put(pageId, lru.get(pageId));
-            lru.remove(pageId);
-        }
-        if (pageFrame.containsKey(pageId)) {
+    public Page getPage(int pageId) {
+        if (lru.containsKey(pageId) || pageFrame.containsKey(pageId)) {
             pin(pageId);
             return pageFrame.get(pageId);
         } else {
-            pin(pageId);
-            Page temp = diskManager.readPage(pageId);
-            pageFrame.put(pageId, temp);
-            return temp;
+            try {
+                pin(pageId);
+                Page temp = diskManager.readPage(pageId);
+                pageFrame.put(pageId, temp);
+                return temp;
+            } catch (RuntimeException ex) {
+                throw new RuntimeException("Well, suck my dick then! (getting page)");
+            }
         }
     }
 }

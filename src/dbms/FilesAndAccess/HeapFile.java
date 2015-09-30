@@ -21,15 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.FilesAndAccess;
+
+import dbms.FilesAndAccess.Record;
+import dbms.BufferManager.BufferManager;
+import dbms.DiskSpaceManager.DiskSpaceManager;
 
 /**
  *
  * @author esengie
  */
-public class MetaPage{
-    HeapPage mPage;
-    MetaPage(HeapPage p){
-        mPage = p;
+public class HeapFile {
+    MetaPage metad;
+    private final int globalFree = 0;
+//    private final int myFull;
+//    private final int myPartial;
+    private final int recordSize;
+
+    DiskSpaceManager  ptrDSM;
+    BufferManager     ptrBufM;
+    public HeapFile(DiskSpaceManager d, BufferManager b, int rSize) {
+        ptrDSM  = d;
+        ptrBufM = b;
+        recordSize = rSize;
     }
+    // if exists
+//    HeapFile(MetaPage p){
+//        
+//    }
+    void insertRecord(Record rec){
+        
+    }
+    void deleteRecord(int rid){
+        
+    }
+//    Record get(Record.Rid rid){
+//        
+//        return r;
+//    }
+    void destroy(){
+        
+    }
+    
 }

@@ -21,36 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.DiskSpaceManager;
 
+import dbms.SettingsAndMeta.GlobalConsts;
 import java.nio.ByteBuffer;
 
 /**
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class Page {
-
-    private static final int PREV = 0;
-    private static final int NEXT = 4;
-    private static final int SIZE = 4096;
-    private static final int DELETED = 8;
-    private static final int FREE = 9;
-    private sta
+public class Page extends GlobalConsts {
     private final int Id;
     
-    protected ByteBuffer buff;
+    public ByteBuffer buff;
 
-    Page(int id) {
+    public Page(int id) {
         Id = id;
-        buff = ByteBuffer.allocate(SIZE);
+        buff = ByteBuffer.allocate(PAGE_SIZE);
     }
 
     public int getId() {
         return Id;
     }
     public int getSize() {
-        return SIZE;
+        return PAGE_SIZE;
     }
     protected void setInt(int pos, int k) {
         buff.putInt(pos, k);
@@ -58,34 +52,34 @@ public class Page {
     protected int getInt(int pos) {
         return buff.getInt(pos);
     }
-    protected void setPrev(int k) {
-        setInt(PREV, k);
+    public void setPrev(int k) {
+        setInt(PAGE_PREV, k);
     }
-    protected int getPrev() {
-        return getInt(PREV);
+    public int getPrev() {
+        return getInt(PAGE_PREV);
     }
-    protected void setNext(int k) {
-        setInt(NEXT, k);
+    public void setNext(int k) {
+        setInt(PAGE_NEXT, k);
     }
-    protected int getNext() {
-        return getInt(NEXT);
+    public int getNext() {
+        return getInt(PAGE_NEXT);
     }
-    protected void setFree(int f){
-        setInt(FREE, f);
+    public void commitFree(int free){
+        setInt(PAGE_FREE, free);
     }
     // do not ever use this!
-    protected void setInitialFree(){
-        setInt(FREE, SIZE - (FREE + 4));
+    public void setInitialFree(){
+        setInt(PAGE_FREE, PAGE_SIZE - page_offset);
     }
-    protected int getFree(){
-        return getInt(FREE);
+    public int getFree(){
+        return getInt(PAGE_FREE);
     }
-    protected void setDeleted(){
+    public void setDeleted(){
         byte l = 1;
-        buff.put(DELETED, l);
+        buff.put(PAGE_DELETED, l);
     }
-    protected void unsetDeleted(){
+    public void unsetDeleted(){
         byte l = 0;
-        buff.put(DELETED, l);
+        buff.put(PAGE_DELETED, l);
     }
 }

@@ -21,12 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.FilesAndAccess;
+
+import dbms.SettingsAndMeta.RecordStructure;
+import java.nio.ByteBuffer;
 
 /**
  *
  * @author esengie
  */
 public class Record {
+    public class Rid{
+        public int pid;
+        public int sid;
+    }
+    
+    public ByteBuffer buff;
+    private Rid rid;
+    
+    public Record(RecordStructure str){
+        buff = ByteBuffer.allocate(str.getRecordSize());
+        rid = new Rid();
+    }
+    public void setRid(int pid, int sid){
+        rid.pid = pid;
+        rid.sid = sid;
+    }
     
 }
+
+

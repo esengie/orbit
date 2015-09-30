@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 esengie.
+ * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
-
-import java.util.BitSet;
+package dbms.SettingsAndMeta;
 
 /**
  *
- * @author esengie
+ * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class HeapPage extends Page{
-    private int recordSize;
-    private int free;
-    private int slots_position;
-    BitSet slots;
-    
-    HeapPage(int i, int rSize){
-        super(i);
-        recordSize = rSize;
-        free = getFree();
-        slots_position = getSize() - (slots.size() + 7) / 8;
-        buff.position(slots_position);
-        slots = BitSet.valueOf(buff);
-    }
-    
-    void create(){
-        int slots_size = free / (recordSize + 1);  //because need to store this bitset also
-        free -= (slots.size() + 7) / 8;
-        setFree(free);
-    }
-//    private void putInt(int k){
-//        buff.putInt(k);
-//    }
-//    public void putLong(long i){
-//        buff.putLong(i);
-//    }
-    private void setBits(){
-        buff.position(slots_position);
-        buff.put(slots.toByteArray());
-    }
+public class GlobalConsts {
+    // Page consts
+    protected static final int PAGE_PREV = 0;
+    protected static final int PAGE_NEXT = 4;
+    protected static final int PAGE_SIZE = 4096;
+    protected static final int PAGE_DELETED = 8;
+    protected static final int PAGE_FREE = 9;
+    protected static final int page_offset = PAGE_FREE + 4;
+    // Disk Space manager consts
+    protected static final int DBMS_FILE_MAX_SIZE = 1000000;
+    protected static final int EXTEND_DB = 10;
+    // Buffer Manager consts
+    protected static final int BUFF_DEFAULT_PAGES = 200;
+    protected static final int BUFF_DEFAULT_MIN_PAGES = 5;
+    protected static final int BUFF_DEFAULT_PINNED_FRACTIONS = 20;
 }

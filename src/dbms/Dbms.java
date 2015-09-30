@@ -23,6 +23,11 @@
  */
 package dbms;
 
+import dbms.SettingsAndMeta.RecordStructure;
+import dbms.FilesAndAccess.HeapPage;
+import dbms.FilesAndAccess.Record;
+import dbms.BufferManager.BufferManager;
+import dbms.DiskSpaceManager.DiskSpaceManager;
 import java.io.IOException;
 import java.util.ArrayList;
 //import java.util.Map.Entry;
@@ -37,6 +42,7 @@ public class Dbms {
 
     DiskSpaceManager f;
     BufferManager buf;
+    RecordStructure struc;
     
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
@@ -53,19 +59,24 @@ public class Dbms {
         buf = new BufferManager(5);
         buf.setManager(f);
         f.createDB("atari.txt");
+        
+        struc = new RecordStructure();
+        struc.addField("fap", "Int");
+        struc.addCharField("lap", 22);
+        
         ArrayList<Integer> arr = new ArrayList<>();
-        byte[] er; Page p;
+        byte[] er; 
         for (Integer i = 0; i < 7; ++i){
             arr.add(f.allocatePage()); // --usage
             Integer temp = arr.get(i);
-            
-            p = buf.getPage(temp);   // --usage, it is pinned
             String s = new String("fffffffffffffffffffffffffffffffffff" + i.toString());
             er = hexStringToByteArray(s);
-            p.buff.position(13);
-            p.buff.put(er);  // --usage
-            buf.setDirty(temp); // --usage explicit set
-            buf.unpin(temp);  // --usage unpin neeeeeded/ maybe add "with"
+            
+            HeapPage p = new HeapPage(temp, er.length, buf);   // --usage, it is pinned
+            p.create();
+            Record rec = new Record(struc);
+            rec.buff.put(er);
+            p.insertRecord(rec);
         }
         buf.flushAll(); // --usage
         f.closeDB();

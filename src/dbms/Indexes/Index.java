@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 esengie.
+ * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.Indexes;
 
 /**
  *
- * @author esengie
+ * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-public class LRUCache<K, V> extends LinkedHashMap<K, V> {
-  private final int cacheSize;
-
-  public LRUCache(int cachSz) {
-    super(16, 0.75f, false);  // modify order
-    cacheSize = cachSz;
-  }
-  public int capacity(){
-      return cacheSize;
-  }
-  @Override
-  protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-    return size() >= cacheSize;
-  }
+public class Index {
+    
 }

@@ -21,29 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package dbms.FilesAndAccess;
 
 /**
  *
  * @author esengie
  */
-public class HeapFile {
-    MetaPage metad;
-    HeapFile(MetaPage p){
-        
-    }
-    void insertRecord(Record rec){
-        
-    }
-    void deleteRecord(int rid){
-        
-    }
-//    Record get(int rid){
-//        Record r = new Record;
-//        return r;
+public class MetaPage{ //extends HeapPage{
+//    HeapPage mPage;
+//    MetaPage(){
+//        mPage = p;
 //    }
-    void destroy(){
-        
-    }
-    
 }

@@ -24,61 +24,68 @@
 package dbms;
 
 import java.nio.ByteBuffer;
-import java.util.BitSet;
 
 /**
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
 public class Page {
-    protected static final int PREV = 0;
-    protected static final int NEXT = 4;
-    protected static final int DELETED = 8;
-    protected static final int FREE = 9;
-    protected static final int SIZE = 4096;
+
+    private static final int PREV = 0;
+    private static final int NEXT = 4;
+    private static final int SIZE = 4096;
+    private static final int DELETED = 8;
+    private static final int FREE = 9;
+    private sta
     private final int Id;
-    private int free = 4096 - FREE - 4; // prev next deleted free
+    
     protected ByteBuffer buff;
+
     Page(int id) {
         Id = id;
-        buff = ByteBuffer.allocate(4096);
-        buff.position(FREE + 4);
+        buff = ByteBuffer.allocate(SIZE);
     }
-    void put(ByteBuffer src){
-        buff.put(src);
-    }
-    public int getId(){
+
+    public int getId() {
         return Id;
     }
-    public int getFree(){
-        return free;
-    }
-    public int getSize(){
+    public int getSize() {
         return SIZE;
     }
-    private void updateFree(){
-        setInt(free, FREE);
-    }
-    private void setInt(int k, int pos){
+    protected void setInt(int pos, int k) {
         buff.putInt(pos, k);
     }
-    private int getInt(int pos){
+    protected int getInt(int pos) {
         return buff.getInt(pos);
     }
-    void setPrev(int k){
-        setInt(k, PREV);
+    protected void setPrev(int k) {
+        setInt(PREV, k);
     }
-    int getPrev(){
+    protected int getPrev() {
         return getInt(PREV);
     }
-    void setNext(int k){
-        setInt(k, NEXT);
+    protected void setNext(int k) {
+        setInt(NEXT, k);
     }
-    int getNext(){
+    protected int getNext() {
         return getInt(NEXT);
     }
-    void setDeleted(){
+    protected void setFree(int f){
+        setInt(FREE, f);
+    }
+    // do not ever use this!
+    protected void setInitialFree(){
+        setInt(FREE, SIZE - (FREE + 4));
+    }
+    protected int getFree(){
+        return getInt(FREE);
+    }
+    protected void setDeleted(){
         byte l = 1;
         buff.put(DELETED, l);
-    }    
+    }
+    protected void unsetDeleted(){
+        byte l = 0;
+        buff.put(DELETED, l);
+    }
 }

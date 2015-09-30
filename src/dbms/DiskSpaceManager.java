@@ -70,9 +70,10 @@ public class DiskSpaceManager {
         mFile.writeInt(0); // set Prev
 
         for (int i = mSize + 1; i < mSize + num; ++i) {
-            mFile.writeInt(i);
+            mFile.writeInt(i); // set Next
+            mFile.writeInt(fPage.getFree());
             mFile.seek((long) (i * fPage.getSize()));
-            mFile.writeInt(i);
+            mFile.writeInt(i); // set Prev
         }
         mSize += num;
         fPage.setPrev(mSize - 1);
@@ -119,6 +120,7 @@ public class DiskSpaceManager {
         try {
             mFile = new RandomAccessFile(fName, "rw");  //open connection
             fPage = readPage(0);
+            fPage.setInitialFree();
         } catch (IOException except) {
             System.out.println("Well, suck my dick then! (creating db)");
         }

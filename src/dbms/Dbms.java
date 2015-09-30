@@ -25,7 +25,7 @@ package dbms;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map.Entry;
+//import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,9 +37,7 @@ public class Dbms {
 
     DiskSpaceManager f;
     BufferManager buf;
-    /**
-     * @param args the command line arguments
-     */
+    
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -58,16 +56,18 @@ public class Dbms {
         ArrayList<Integer> arr = new ArrayList<>();
         byte[] er; Page p;
         for (Integer i = 0; i < 7; ++i){
-            arr.add(f.allocatePage());
+            arr.add(f.allocatePage()); // --usage
             Integer temp = arr.get(i);
-            p = buf.getPage(temp);
+            
+            p = buf.getPage(temp);   // --usage, it is pinned
             String s = new String("fffffffffffffffffffffffffffffffffff" + i.toString());
             er = hexStringToByteArray(s);
-            p.buff.put(er);
-            buf.setDirty(temp);
-            buf.unpin(temp);
+            p.buff.position(13);
+            p.buff.put(er);  // --usage
+            buf.setDirty(temp); // --usage explicit set
+            buf.unpin(temp);  // --usage unpin neeeeeded/ maybe add "with"
         }
-        buf.flushAll();
+        buf.flushAll(); // --usage
         f.closeDB();
    
     }

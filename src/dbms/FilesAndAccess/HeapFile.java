@@ -23,44 +23,64 @@
  */
 package dbms.FilesAndAccess;
 
-import dbms.FilesAndAccess.Record;
 import dbms.BufferManager.BufferManager;
 import dbms.DiskSpaceManager.DiskSpaceManager;
+import dbms.SettingsAndMeta.Catalogue;
+import dbms.SettingsAndMeta.RecordStructure;
 
 /**
  *
  * @author esengie
  */
 public class HeapFile {
-    MetaPage metad;
-    private final int globalFree = 0;
-//    private final int myFull;
-//    private final int myPartial;
-    private final int recordSize;
 
-    DiskSpaceManager  ptrDSM;
-    BufferManager     ptrBufM;
-    public HeapFile(DiskSpaceManager d, BufferManager b, int rSize) {
-        ptrDSM  = d;
-        ptrBufM = b;
-        recordSize = rSize;
+    private final MetaPage metaPage;
+    private final int globalFree = 0;
+    private final int myFull;
+    private final int myPartial;
+    private final RecordStructure recStr;
+
+    DiskSpaceManager ptrDSM;
+    BufferManager ptrBufM;
+    Catalogue ptrCat;
+
+    // if never existed
+
+    static void create(DiskSpaceManager dsk, BufferManager buf) {
+        int tmp = dsk.allocatePage();
+        MetaPage metaPage = new MetaPage(tmp, buf);
+        metaPage.create();
+        int halfFull = dsk.allocatePage();
+        int full = dsk.allocatePage();
+        metaPage.setHalfFull(halfFull); 
+        metaPage.setFull(full);
     }
+
     // if exists
-//    HeapFile(MetaPage p){
-//        
-//    }
-    void insertRecord(Record rec){
+
+    HeapFile(DiskSpaceManager d, BufferManager b, int meta, RecordStructure rec) {
+        ptrDSM = d;
+        ptrBufM = b;
+        metaPage = new MetaPage(meta, ptrBufM);
+        recStr = rec;
+        myFull = metaPage.getFull();
+        myPartial = metaPage.getHalfFull();
+    }
+
+    public void insertRecord(Record rec) {
         
     }
-    void deleteRecord(int rid){
-        
+
+    public void deleteRecord(int rid) {
+
     }
-//    Record get(Record.Rid rid){
-//        
-//        return r;
-//    }
-    void destroy(){
-        
+
+    public void destroy() {
+
     }
     
+    private void extendPartial(){
+        
+    }
+
 }

@@ -37,7 +37,7 @@ public class Record {
     }
     
     public ByteBuffer buff;
-    private Rid rid;
+    private final Rid rid;
     
     public Record(RecordStructure str){
         buff = ByteBuffer.allocate(str.getRecordSize());
@@ -47,7 +47,9 @@ public class Record {
         rid.pid = pid;
         rid.sid = sid;
     }
-    
+    public Rid getRid(){
+        return rid;
+    }
 }
 
 

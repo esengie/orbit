@@ -44,19 +44,30 @@ public class DiskSpaceManager extends GlobalConsts {
     public int allocatePage() {
         // doesn't care about prev, maybe fix later
         if (mSize < DBMS_FILE_MAX_SIZE || freePages > 0) {
-            int firstFree = 0;
+            int ret = 0;
             try {
                 if (0 == freePages) {
                     extendDb(EXTEND_DB);
                 }
                 Page local = readPage(fPage.getNext());
-                firstFree = local.getId();
+                ret = local.getId();
+                
+                // To be clean
+                local.setNext(ret);
+                local.setPrev(ret);
+                writePage(local);
+                
                 fPage.setNext(local.getNext());
+                // setting prev
+                local = readPage(local.getNext());
+                local.setPrev(fPage.getId());
+                writePage(local);
+                
                 --freePages;
             } catch (IOException ex) {
                 throw new IllegalStateException("Read page error on allocate; allocate aborted", ex);
             }
-            return firstFree;
+            return ret;
         } else {
             throw new IllegalStateException("Not enough space left; allocate aborted");
         }
@@ -73,8 +84,9 @@ public class DiskSpaceManager extends GlobalConsts {
             mFile.writeInt(i); // set Next
             mFile.writeInt(fPage.getFree());
             mFile.seek((long) (i * fPage.getSize()));
-            mFile.writeInt(i); // set Prev
+            mFile.writeInt(i-1); // set Prev
         }
+        // here we don't write next because it's zero
         mSize += num;
         fPage.setPrev(mSize - 1);
     }
@@ -83,7 +95,12 @@ public class DiskSpaceManager extends GlobalConsts {
             try {
                 Page local = readPage(pageId);
                 local.setNext(fPage.getNext());
-                fPage.setNext(pageId);
+                // setting prev
+                Page nextLocal = readPage(fPage.getNext());
+                nextLocal.setPrev(local.getId());
+                writePage(nextLocal);
+                
+                fPage.setNext(local.getId());
                 writePage(local);
                 ++freePages;
             } catch (RuntimeException ex) {

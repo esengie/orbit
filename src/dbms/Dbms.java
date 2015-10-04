@@ -28,6 +28,7 @@ import dbms.FilesAndAccess.HeapPage;
 import dbms.FilesAndAccess.Record;
 import dbms.BufferManager.BufferManager;
 import dbms.DiskSpaceManager.DiskSpaceManager;
+import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
 import java.util.ArrayList;
 //import java.util.Map.Entry;
@@ -78,6 +79,10 @@ public class Dbms {
             rec.buff.put(er);
             p.insertRecord(rec);
         }
+//        Page pa = buf.getPage(8);
+//        pa = buf.getPage(pa.getPrev());
+//        System.out.println(pa.getPrev());
+        
         buf.flushAll(); // --usage
         f.closeDB();
    

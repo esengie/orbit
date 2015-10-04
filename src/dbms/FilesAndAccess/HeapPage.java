@@ -23,7 +23,6 @@
  */
 package dbms.FilesAndAccess;
 
-import dbms.FilesAndAccess.Record;
 import dbms.BufferManager.BufferManager;
 import dbms.DiskSpaceManager.Page;
 import dbms.SettingsAndMeta.GlobalConsts;
@@ -38,7 +37,7 @@ import java.util.BitSet;
 public class HeapPage extends GlobalConsts{
     // Simple fixed length slots given by recordSize from Record
     // Also stores a BitSet in the end of a Page
-    private final int pid;
+    protected final int pid;
     private final int recordSize;
     private final int slotsPosition;
     private final BitSet slots;
@@ -124,5 +123,21 @@ public class HeapPage extends GlobalConsts{
     private void commitBits(Page p){
         p.buff.position(slotsPosition);
         p.buff.put(slots.toByteArray());
+    }
+    /// Use with caution
+    protected void insertRecordAtPos(Record rec, int pos){
+        Page p = buf.getPage(pid);
+        
+        int i = pos;
+        p.buff.position(Page.page_offset + recordSize * i);
+        rec.setRid(p.getId(), i);
+        p.buff.put(rec.buff);
+        free -= recordSize;
+        slots.flip(i);
+        p.commitFree(free);
+        commitBits(p);
+        
+        buf.setDirty(pid);
+        buf.unpin(pid);
     }
 }

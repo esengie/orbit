@@ -31,11 +31,13 @@ import dbms.SettingsAndMeta.RecordStructure;
  * @author esengie
  */
 public class MetaPage extends HeapPage{
-    private RecordStructure recStr;
+    private final RecordStructure recStr;
     public MetaPage(int pageNum, BufferManager b){
         super(pageNum, META_PAGE_RECORD_SIZE, b);
         recStr = new RecordStructure();
-        recStr.addField("data", "int");
+        recStr.addField("half_full_loc", "int");
+        recStr.addField("full_loc", "int");
+        Record rec = new Record(recStr);
         
     }
     public int getHalfFull(){

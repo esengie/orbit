@@ -35,7 +35,6 @@ public class Record {
         public int pid;
         public int sid;
     }
-    
     public ByteBuffer buff;
     private final Rid rid;
     

@@ -68,11 +68,11 @@ public class HeapFile {
     }
 
     public void insertRecord(Record rec) {
-
+        /////////////HeapPage p = new Page(myPartial, recStr.getRecordSize(), ptrBufM);
+        
     }
 
     public void deleteRecord(Record.Rid rid) {
-
         HeapPage p = new HeapPage(rid.pid, recStr.getRecordSize(), ptrBufM);
         
         if (p.getFreeSlotsNum() == 0){
@@ -82,7 +82,6 @@ public class HeapFile {
                 movePage(globalFree, rid.pid);
             }
         }
-        
         p.deleteRecord(rid);
     }
     private void movePage(int to, int pid){

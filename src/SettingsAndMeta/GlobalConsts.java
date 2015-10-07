@@ -45,7 +45,7 @@ public class GlobalConsts {
     protected static final int BUFF_DEFAULT_MIN_PAGES = 5;
     protected static final int BUFF_DEFAULT_PINNED_FRACTIONS = 20;
     // Metadata consts
-    protected static final int META_PAGE_RECORD_SIZE = 8;
+    protected static final int META_PAGE_RECORD_SIZE = 4;
     protected static final int META_HALF_FULL_LOC = 0;
     protected static final int META_FULL_LOC = 1;
 }

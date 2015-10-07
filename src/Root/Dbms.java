@@ -28,6 +28,7 @@ import FilesAndAccess.HeapPage;
 import FilesAndAccess.Record;
 import BufferManager.BufferManager;
 import DiskSpaceManager.DiskSpaceManager;
+import DiskSpaceManager.Page;
 import FilesAndAccess.HeapFile;
 //import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
@@ -69,24 +70,31 @@ public class Dbms {
         
         ArrayList<Integer> arr = new ArrayList<>();
         int met = HeapFile.create(f, buf);
+//        System.out.println(met);
         any = new HeapFile(f, buf, met, struc);
         byte[] er; 
-        for (Integer i = 0; i < 7; ++i){
-            arr.add(f.allocatePage()); // --usage
-            Integer temp = arr.get(i);
-            String s = new String("fffffffffffffffffffffffffffffffffff" + i.toString());
+        for (Integer i = 0; i < 6000; ++i){
+//            arr.add(f.allocatePage()); // --usage
+//            Integer temp = arr.get(i);
+            String s = new String("ffffffffffffffffffffffffffffffffff");
             er = hexStringToByteArray(s);
             
-            HeapPage p = new HeapPage(temp, er.length, buf);   // --usage, it is pinned
-            p.create();
+            
+            
+//            HeapPage p = new HeapPage(temp, er.length, buf);   // --usage, it is pinned
+//            p.create();
             Record rec = new Record(struc);
-            rec.buff.put(er);
-            p.insertRecord(rec);
+            any.insertRecord(rec);
+//            rec.buff.position(0);
+//            rec.buff.put(er);
+//            p.insertRecord(rec);
         }
 //        Page pa = buf.getPage(8);
 //        pa = buf.getPage(pa.getPrev());
 //        System.out.println(pa.getPrev());
+//        
         
+//        any.destroy();
         buf.flushAll(); // --usage
         f.closeDB();
    

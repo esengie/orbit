@@ -52,12 +52,13 @@ public class HeapPage extends GlobalConsts{
         Page p = buf.getPage(pid);
         free = p.getFree();
         // + 1 because need to store this bitset also
-        int slots_size = (p.getSize() - Page.page_offset) / (recordSize + 1); 
-        slotsPosition = p.getSize() - (slots_size + 7) / 8;
+        int number_of_slots = (p.getSize() - Page.page_offset) * 8 / (8 * recordSize + 1); 
+        slotsPosition = p.getSize() - (number_of_slots + 7) / 8;
         p.buff.position(slotsPosition);
         
         ByteBuffer buftmp = p.buff.duplicate();
-        buftmp.limit (buftmp.position() + (slots_size + 7) / 8);
+        // not - 7, because we could have more bits than we have memory
+        buftmp.limit (buftmp.position() + (number_of_slots) / 8); 
         slots = BitSet.valueOf(buftmp);
         
         buf.setDirty(pid);
@@ -80,6 +81,7 @@ public class HeapPage extends GlobalConsts{
         int i = slots.nextClearBit(0);
         p.buff.position(Page.page_offset + recordSize * i);
         rec.setRid(p.getId(), i);
+        rec.buff.position(0);
         p.buff.put(rec.buff);
         free -= recordSize;
         slots.flip(i);
@@ -135,11 +137,38 @@ public class HeapPage extends GlobalConsts{
         int i = pos;
         p.buff.position(Page.page_offset + recordSize * i);
         rec.setRid(p.getId(), i);
+        rec.buff.position(0);
         p.buff.put(rec.buff);
         free -= recordSize;
         slots.flip(i);
         p.commitFree(free);
         commitBits(p);
+        
+        buf.setDirty(pid);
+        buf.unpin(pid);
+    }
+    public int getNext(){
+        Page p = buf.getPage(pid);
+        int ret = p.getNext();
+        buf.unpin(pid);
+        return ret;
+    }
+    public int getPrev(){
+        Page p = buf.getPage(pid);
+        int ret = p.getPrev();
+        buf.unpin(pid);
+        return ret;
+    }
+    public void setNext(int id){
+        Page p = buf.getPage(pid);
+        p.setNext(id);
+        
+        buf.setDirty(pid);
+        buf.unpin(pid);
+    }
+    public void setPrev(int id){
+        Page p = buf.getPage(pid);
+        p.setPrev(id);
         
         buf.setDirty(pid);
         buf.unpin(pid);

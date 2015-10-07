@@ -52,14 +52,15 @@ public class DiskSpaceManager extends GlobalConsts {
                 Page local = readPage(fPage.getNext());
                 ret = local.getId();
                 
+                fPage.setNext(local.getNext());
                 // To be clean
                 local.setNext(ret);
                 local.setPrev(ret);
+                local.setInitialFree();
                 writePage(local);
                 
-                fPage.setNext(local.getNext());
                 // setting prev
-                local = readPage(local.getNext());
+                local = readPage(fPage.getNext());
                 local.setPrev(fPage.getId());
                 writePage(local);
                 
@@ -95,13 +96,16 @@ public class DiskSpaceManager extends GlobalConsts {
             try {
                 Page local = readPage(pageId);
                 local.setNext(fPage.getNext());
+                local.setPrev(fPage.getId());
+                local.setInitialFree();
+                writePage(local);
                 // setting prev
                 Page nextLocal = readPage(fPage.getNext());
                 nextLocal.setPrev(local.getId());
                 writePage(nextLocal);
                 
                 fPage.setNext(local.getId());
-                writePage(local);
+                writePage(fPage);
                 ++freePages;
             } catch (RuntimeException ex) {
                 throw new IllegalStateException("Error during deallocation ", ex);

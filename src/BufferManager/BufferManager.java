@@ -123,7 +123,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 pageFrame.put(pageId, temp);
                 return temp;
             } catch (RuntimeException ex) {
-                throw new RuntimeException("Well, error! (getting page)");
+                throw new RuntimeException("Well, error! (getting page) " + ex.getMessage());
             }
         }
     }

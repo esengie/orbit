@@ -35,7 +35,6 @@ import SettingsAndMeta.RecordStructure;
 public class HeapFile {
 
     private final MetaPage metaPage;
-    private final int globalFree = 0;
     private final int myFull;
     private final int myPartial;
     private final RecordStructure recStr;
@@ -68,31 +67,74 @@ public class HeapFile {
     }
 
     public void insertRecord(Record rec) {
-        /////////////HeapPage p = new Page(myPartial, recStr.getRecordSize(), ptrBufM);
-        
+        HeapPage myP = getHeapPage(myPartial);
+        HeapPage mine;
+        if (myP.getNext() == myPartial){
+            mine = getHeapPage(ptrDSM.allocatePage());
+            mine.create();
+            
+            mine.setNext(myPartial);
+            mine.setPrev(myPartial);
+            myP.setNext(mine.pid);
+            myP.setPrev(mine.pid);
+            
+            mine.insertRecord(rec);
+        } else {      
+            int mem = myP.getNext();
+            mine = getHeapPage(mem);
+            mine.insertRecord(rec);
+            if (mine.getFreeSlotsNum() == 0){
+                movePage(myFull, mine.pid);
+            }
+        }
     }
 
+    private HeapPage getHeapPage(int pageNum){
+        return new HeapPage(pageNum, recStr.getRecordSize(), ptrBufM);
+    }
     public void deleteRecord(Record.Rid rid) {
-        HeapPage p = new HeapPage(rid.pid, recStr.getRecordSize(), ptrBufM);
-        
+        HeapPage p = getHeapPage(rid.pid);
         if (p.getFreeSlotsNum() == 0){
             movePage(myPartial, rid.pid);
         } else {
             if (p.getOccupiedSlotsNum() == 1){
-                movePage(globalFree, rid.pid);
+                ptrDSM.deallocatePage(rid.pid);
+                return;
             }
         }
         p.deleteRecord(rid);
     }
     private void movePage(int to, int pid){
-        throw new IllegalArgumentException("Well, error in moving pages in pagefile!");
+        HeapPage toP = getHeapPage(to);
+        HeapPage moved = getHeapPage(pid);
+        
+        HeapPage tmp = getHeapPage(moved.getNext());
+        tmp.setPrev(moved.getPrev());
+        tmp = getHeapPage(moved.getPrev());
+        tmp.setNext(moved.getNext());
+        
+        moved.setNext(toP.getNext());
+        moved.setPrev(to);
+        
+        toP.setNext(pid);
     }
     public void destroy() {
-
+        HeapPage iter = getHeapPage(myFull);
+        HeapPage tmp;
+        while (myFull != iter.getNext()){
+//            System.out.println(iter.getNext());
+            tmp = getHeapPage(iter.getNext());
+            iter.setNext(tmp.getNext());
+            ptrDSM.deallocatePage(tmp.pid);
+        }        
+        iter = getHeapPage(myPartial);
+        while (myPartial != iter.getNext()){
+            tmp = getHeapPage(iter.getNext());
+            iter.setNext(tmp.getNext());
+            ptrDSM.deallocatePage(tmp.pid);
+        }
+        ptrDSM.deallocatePage(myFull);
+        ptrDSM.deallocatePage(myPartial);
+        ptrDSM.deallocatePage(metaPage.pid);
     }
-
-    private void extendPartial() {
-
-    }
-
 }

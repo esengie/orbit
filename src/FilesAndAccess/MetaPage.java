@@ -36,7 +36,7 @@ public class MetaPage extends HeapPage{
         super(pageNum, META_PAGE_RECORD_SIZE, b);
         recStr = new RecordStructure();
         recStr.addField("half_full_loc", "int");
-        recStr.addField("full_loc", "int");
+//        recStr.addField("full_loc", "int");
     }
     public int getHalfFull(){
         return getInt(META_HALF_FULL_LOC);

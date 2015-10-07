@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.DiskSpaceManager;
+package DiskSpaceManager;
 
-import dbms.SettingsAndMeta.GlobalConsts;
+import SettingsAndMeta.GlobalConsts;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -147,7 +147,7 @@ public class DiskSpaceManager extends GlobalConsts {
             fPage = readPage(0);
             fPage.setInitialFree();
         } catch (IOException except) {
-            throw new RuntimeException("Well, suck my dick then! (creating db)");
+            throw new RuntimeException("Well, error! (creating db)");
         }
     }
     public void openDB(String f) {
@@ -158,7 +158,7 @@ public class DiskSpaceManager extends GlobalConsts {
             mFile = new RandomAccessFile(fName, "rw");
             fPage = readPage(0);
         } catch (IOException except) {
-            throw new RuntimeException("Well, suck my dick then! (opening db)");
+            throw new RuntimeException("Well, error! (opening db)");
         }
     }
     public void closeDB() {
@@ -168,7 +168,7 @@ public class DiskSpaceManager extends GlobalConsts {
             writePage(fPage);
             mFile.close();
         } catch (IOException ex) {
-            throw new RuntimeException("Well, suck my dick then! (flushing to disk before exit)");
+            throw new RuntimeException("Well, error! (flushing to disk before exit)");
         }
     }
     public void deleteDB() {

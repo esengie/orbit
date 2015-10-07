@@ -21,19 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms;
+package Root;
 
-import dbms.SettingsAndMeta.RecordStructure;
-import dbms.FilesAndAccess.HeapPage;
-import dbms.FilesAndAccess.Record;
-import dbms.BufferManager.BufferManager;
-import dbms.DiskSpaceManager.DiskSpaceManager;
-import dbms.DiskSpaceManager.Page;
+import SettingsAndMeta.RecordStructure;
+import FilesAndAccess.HeapPage;
+import FilesAndAccess.Record;
+import BufferManager.BufferManager;
+import DiskSpaceManager.DiskSpaceManager;
+import FilesAndAccess.HeapFile;
+//import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
 import java.util.ArrayList;
 //import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
 /**
  *
@@ -44,6 +45,7 @@ public class Dbms {
     DiskSpaceManager f;
     BufferManager buf;
     RecordStructure struc;
+    HeapFile any;
     
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
@@ -66,6 +68,8 @@ public class Dbms {
         struc.addCharField("lap", 22);
         
         ArrayList<Integer> arr = new ArrayList<>();
+        int met = HeapFile.create(f, buf);
+        any = new HeapFile(f, buf, met, struc);
         byte[] er; 
         for (Integer i = 0; i < 7; ++i){
             arr.add(f.allocatePage()); // --usage
@@ -94,7 +98,7 @@ public class Dbms {
             Dbms df = new Dbms();
             // TODO code application logic here
         } catch (IOException ex) {
-            Logger.getLogger(Dbms.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(Dbms.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

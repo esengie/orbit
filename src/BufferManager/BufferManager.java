@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.BufferManager;
+package BufferManager;
 
-import dbms.DiskSpaceManager.Page;
-import dbms.DiskSpaceManager.DiskSpaceManager;
-import dbms.SettingsAndMeta.GlobalConsts;
+import DiskSpaceManager.Page;
+import DiskSpaceManager.DiskSpaceManager;
+import SettingsAndMeta.GlobalConsts;
 import static java.lang.Math.max;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +108,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 diskManager.writePage(lru.get(elem.getKey()));
             }
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Well, suck my dick then! (flushing buffer)");
+            throw new RuntimeException("Well, error! (flushing buffer)");
         }
     }
 
@@ -123,7 +123,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 pageFrame.put(pageId, temp);
                 return temp;
             } catch (RuntimeException ex) {
-                throw new RuntimeException("Well, suck my dick then! (getting page)");
+                throw new RuntimeException("Well, error! (getting page)");
             }
         }
     }

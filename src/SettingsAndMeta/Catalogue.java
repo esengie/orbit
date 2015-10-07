@@ -21,45 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.FilesAndAccess;
-
-import dbms.BufferManager.BufferManager;
-import dbms.SettingsAndMeta.RecordStructure;
+package SettingsAndMeta;
 
 /**
  *
  * @author esengie
  */
-public class MetaPage extends HeapPage{
-    private final RecordStructure recStr;
-    public MetaPage(int pageNum, BufferManager b){
-        super(pageNum, META_PAGE_RECORD_SIZE, b);
-        recStr = new RecordStructure();
-        recStr.addField("half_full_loc", "int");
-        recStr.addField("full_loc", "int");
-        Record rec = new Record(recStr);
-        
-    }
-    public int getHalfFull(){
-        return getInt(META_HALF_FULL_LOC);
-    }
-    public int getFull(){
-        return getInt(META_FULL_LOC);
-    }
-    public void setFull(int id){
-        setInt(id, META_FULL_LOC);
-    }
-    public void setHalfFull(int id){
-        setInt(id, META_HALF_FULL_LOC);
-    }
-    private int getInt(int sid){
-        Record rec = new Record(recStr);
-        rec.setRid(pid, sid);
-        return getRecord(recStr, rec.getRid()).buff.getInt();
-    }
-    private void setInt(int t, int pos){
-        Record rec = new Record(recStr);
-        rec.buff.putInt(t);
-        insertRecordAtPos(rec, pos);
-    }
+public class Catalogue {
+    
 }

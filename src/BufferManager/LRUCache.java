@@ -21,12 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.SettingsAndMeta;
+package BufferManager;
 
 /**
  *
  * @author esengie
  */
-public class Catalogue {
-    
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+  private final int cacheSize;
+
+  public LRUCache(int cachSz) {
+    super(16, 0.75f, false);  // modify order
+    cacheSize = cachSz;
+  }
+  public int capacity(){
+      return cacheSize;
+  }
+  @Override
+  protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+    return size() >= cacheSize;
+  }
 }

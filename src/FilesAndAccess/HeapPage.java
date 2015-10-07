@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.FilesAndAccess;
+package FilesAndAccess;
 
-import dbms.BufferManager.BufferManager;
-import dbms.DiskSpaceManager.Page;
-import dbms.SettingsAndMeta.GlobalConsts;
-import dbms.SettingsAndMeta.RecordStructure;
+import BufferManager.BufferManager;
+import DiskSpaceManager.Page;
+import SettingsAndMeta.GlobalConsts;
+import SettingsAndMeta.RecordStructure;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
@@ -119,12 +119,16 @@ public class HeapPage extends GlobalConsts{
     public int getFreeSlotsNum(){
         return free / recordSize;
     }
+    public int getOccupiedSlotsNum(){
+        return slots.size() - getFreeSlotsNum();
+    }
     
     private void commitBits(Page p){
         p.buff.position(slotsPosition);
         p.buff.put(slots.toByteArray());
     }
     /// Use with caution
+    /// used only for MetaPage
     protected void insertRecordAtPos(Record rec, int pos){
         Page p = buf.getPage(pid);
         

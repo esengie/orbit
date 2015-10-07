@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
+ * Copyright 2015 esengie.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.Indexes;
+package FilesAndAccess;
+
+import SettingsAndMeta.RecordStructure;
+import java.nio.ByteBuffer;
 
 /**
  *
- * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
+ * @author esengie
  */
-public class Index {
+public class Record {
+    public class Rid{
+        public int pid;
+        public int sid;
+    }
+    public ByteBuffer buff;
+    private final Rid rid;
     
+    public Record(RecordStructure str){
+        buff = ByteBuffer.allocate(str.getRecordSize());
+        rid = new Rid();
+    }
+    public void setRid(int pid, int sid){
+        rid.pid = pid;
+        rid.sid = sid;
+    }
+    public Rid getRid(){
+        return rid;
+    }
 }
+
+

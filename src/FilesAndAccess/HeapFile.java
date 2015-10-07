@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.FilesAndAccess;
+package FilesAndAccess;
 
-import dbms.BufferManager.BufferManager;
-import dbms.DiskSpaceManager.DiskSpaceManager;
-import dbms.SettingsAndMeta.Catalogue;
-import dbms.SettingsAndMeta.RecordStructure;
+import BufferManager.BufferManager;
+import DiskSpaceManager.DiskSpaceManager;
+import SettingsAndMeta.Catalogue;
+import SettingsAndMeta.RecordStructure;
 
 /**
  *
@@ -45,20 +45,20 @@ public class HeapFile {
     Catalogue ptrCat;
 
     // if never existed
-
-    static void create(DiskSpaceManager dsk, BufferManager buf) {
+    // returns meta page id
+    public static int create(DiskSpaceManager dsk, BufferManager buf) {
         int tmp = dsk.allocatePage();
         MetaPage metaPage = new MetaPage(tmp, buf);
         metaPage.create();
         int halfFull = dsk.allocatePage();
         int full = dsk.allocatePage();
-        metaPage.setHalfFull(halfFull); 
+        metaPage.setHalfFull(halfFull);
         metaPage.setFull(full);
+        return tmp;
     }
 
     // if exists
-
-    HeapFile(DiskSpaceManager d, BufferManager b, int meta, RecordStructure rec) {
+    public HeapFile(DiskSpaceManager d, BufferManager b, int meta, RecordStructure rec) {
         ptrDSM = d;
         ptrBufM = b;
         metaPage = new MetaPage(meta, ptrBufM);
@@ -68,19 +68,32 @@ public class HeapFile {
     }
 
     public void insertRecord(Record rec) {
+
+    }
+
+    public void deleteRecord(Record.Rid rid) {
+
+        HeapPage p = new HeapPage(rid.pid, recStr.getRecordSize(), ptrBufM);
         
+        if (p.getFreeSlotsNum() == 0){
+            movePage(myPartial, rid.pid);
+        } else {
+            if (p.getOccupiedSlotsNum() == 1){
+                movePage(globalFree, rid.pid);
+            }
+        }
+        
+        p.deleteRecord(rid);
     }
-
-    public void deleteRecord(int rid) {
-
+    private void movePage(int to, int pid){
+        throw new IllegalArgumentException("Well, error in moving pages in pagefile!");
     }
-
     public void destroy() {
 
     }
-    
-    private void extendPartial(){
-        
+
+    private void extendPartial() {
+
     }
 
 }

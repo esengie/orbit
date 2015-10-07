@@ -21,34 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dbms.FilesAndAccess;
+package FilesAndAccess;
 
-import dbms.SettingsAndMeta.RecordStructure;
-import java.nio.ByteBuffer;
+import BufferManager.BufferManager;
+import SettingsAndMeta.RecordStructure;
 
 /**
  *
  * @author esengie
  */
-public class Record {
-    public class Rid{
-        public int pid;
-        public int sid;
+public class MetaPage extends HeapPage{
+    private final RecordStructure recStr;
+    public MetaPage(int pageNum, BufferManager b){
+        super(pageNum, META_PAGE_RECORD_SIZE, b);
+        recStr = new RecordStructure();
+        recStr.addField("half_full_loc", "int");
+        recStr.addField("full_loc", "int");
     }
-    public ByteBuffer buff;
-    private final Rid rid;
-    
-    public Record(RecordStructure str){
-        buff = ByteBuffer.allocate(str.getRecordSize());
-        rid = new Rid();
+    public int getHalfFull(){
+        return getInt(META_HALF_FULL_LOC);
     }
-    public void setRid(int pid, int sid){
-        rid.pid = pid;
-        rid.sid = sid;
+    public int getFull(){
+        return getInt(META_FULL_LOC);
     }
-    public Rid getRid(){
-        return rid;
+    public void setFull(int id){
+        setInt(id, META_FULL_LOC);
+    }
+    public void setHalfFull(int id){
+        setInt(id, META_HALF_FULL_LOC);
+    }
+    private int getInt(int sid){
+        Record rec = new Record(recStr);
+        rec.setRid(pid, sid);
+        rec = getRecord(recStr, rec.getRid());
+        return rec.buff.getInt(0);
+    }
+    private void setInt(int t, int pos){
+        Record rec = new Record(recStr);
+        rec.buff.putInt(t);
+        insertRecordAtPos(rec, pos);
     }
 }
-
-

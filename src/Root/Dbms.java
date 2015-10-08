@@ -23,7 +23,7 @@
  */
 package Root;
 
-import SettingsAndMeta.RecordStructure;
+import SettingsAndMeta.Schema;
 import FilesAndAccess.HeapPage;
 import FilesAndAccess.Record;
 import BufferManager.BufferManager;
@@ -45,7 +45,7 @@ public class Dbms {
 
     DiskSpaceManager f;
     BufferManager buf;
-    RecordStructure struc;
+    Schema struc;
     HeapFile any;
     
     public static byte[] hexStringToByteArray(String s) {
@@ -64,7 +64,7 @@ public class Dbms {
         buf.setManager(f);
         f.createDB("atari.txt");
         
-        struc = new RecordStructure();
+        struc = new Schema();
         struc.addField("fap", "Int");
         struc.addCharField("lap", 22);
         

@@ -23,7 +23,7 @@
  */
 package FilesAndAccess;
 
-import SettingsAndMeta.RecordStructure;
+import SettingsAndMeta.Schema;
 import java.nio.ByteBuffer;
 
 /**
@@ -38,7 +38,7 @@ public class Record {
     public ByteBuffer buff;
     private final Rid rid;
     
-    public Record(RecordStructure str){
+    public Record(Schema str){
         buff = ByteBuffer.allocate(str.getRecordSize());
         rid = new Rid();
     }

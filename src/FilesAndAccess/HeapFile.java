@@ -26,23 +26,71 @@ package FilesAndAccess;
 import BufferManager.BufferManager;
 import DiskSpaceManager.DiskSpaceManager;
 import SettingsAndMeta.Catalogue;
-import SettingsAndMeta.RecordStructure;
+import SettingsAndMeta.Schema;
+import java.util.Iterator;
 
 /**
  *
  * @author esengie
  */
-public class HeapFile {
+public class HeapFile implements Iterable<Record>{
 
     private final MetaPage metaPage;
-    private final int myFull;
-    private final int myPartial;
-    private final RecordStructure recStr;
+    protected final int myFull;
+    protected final int myPartial;
+    private final Schema schema;
 
     DiskSpaceManager ptrDSM;
     BufferManager ptrBufM;
     Catalogue ptrCat;
-
+    
+    
+    public Iterator<Record> iterator() {
+        return new Scanner(myFull, myPartial, schema, ptrBufM);
+    }
+    private class Scanner implements Iterator<Record>{
+        private int myFull;
+        private final int myPartial;
+        private final Schema schema;
+        private int curPid;
+        private int curSid;
+        public Scanner(int full, int part, Schema sch, BufferManager buf){
+            myFull = full;
+            myPartial = part;
+            schema = sch;
+            HeapPage p = new HeapPage(myFull, schema.getRecordSize(), buf);
+            curPid = p.getNext();
+            curSid = 0;
+            if (curPid == myFull){
+                p = new HeapPage(myPartial, schema.getRecordSize(), buf);
+                curPid = p.getNext();
+                myFull = 0;
+            }
+        }
+        private boolean hasNextPage(int val){
+            HeapPage p = new HeapPage(curPid, curSid, val)
+            if (myFull != 0 || curPid != myPartial);
+        }
+        @Override
+        public boolean hasNext() {
+            return true;
+        }
+        @Override
+        public Record next() {
+            if(hasNext()) {
+                
+                Record rec = 
+                return rec;
+            }
+            throw new IllegalAccessError("Doesn't have next");
+        }
+        @Override
+        public void remove() {
+            // Really, if you delete everything may break
+            // Look at getRecord
+            throw new UnsupportedOperationException();
+        }
+    }
     // if never existed
     // returns meta page id
     public static int create(DiskSpaceManager dsk, BufferManager buf) {
@@ -57,11 +105,11 @@ public class HeapFile {
     }
 
     // if exists
-    public HeapFile(DiskSpaceManager d, BufferManager b, int meta, RecordStructure rec) {
+    public HeapFile(DiskSpaceManager d, BufferManager b, int meta, Schema rec) {
         ptrDSM = d;
         ptrBufM = b;
         metaPage = new MetaPage(meta, ptrBufM);
-        recStr = rec;
+        schema = rec;
         myFull = metaPage.getFull();
         myPartial = metaPage.getHalfFull();
     }
@@ -88,21 +136,23 @@ public class HeapFile {
             }
         }
     }
-
+    public Record getRecord(Record.Rid rid){
+        HeapPage p = getHeapPage(rid.pid);
+        return p.getRecord(schema, rid);
+    }
     private HeapPage getHeapPage(int pageNum){
-        return new HeapPage(pageNum, recStr.getRecordSize(), ptrBufM);
+        return new HeapPage(pageNum, schema.getRecordSize(), ptrBufM);
     }
     public void deleteRecord(Record.Rid rid) {
         HeapPage p = getHeapPage(rid.pid);
-        if (p.getFreeSlotsNum() == 0){
+        p.deleteRecord(rid);
+        if (p.getFreeSlotsNum() == 1){
             movePage(myPartial, rid.pid);
         } else {
-            if (p.getOccupiedSlotsNum() == 1){
+            if (p.getOccupiedSlotsNum() == 0){
                 ptrDSM.deallocatePage(rid.pid);
-                return;
             }
         }
-        p.deleteRecord(rid);
     }
     private void movePage(int to, int pid){
         HeapPage toP = getHeapPage(to);
@@ -122,7 +172,6 @@ public class HeapFile {
         HeapPage iter = getHeapPage(myFull);
         HeapPage tmp;
         while (myFull != iter.getNext()){
-//            System.out.println(iter.getNext());
             tmp = getHeapPage(iter.getNext());
             iter.setNext(tmp.getNext());
             ptrDSM.deallocatePage(tmp.pid);

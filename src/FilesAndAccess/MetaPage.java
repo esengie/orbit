@@ -24,17 +24,17 @@
 package FilesAndAccess;
 
 import BufferManager.BufferManager;
-import SettingsAndMeta.RecordStructure;
+import SettingsAndMeta.Schema;
 
 /**
  *
  * @author esengie
  */
 public class MetaPage extends HeapPage{
-    private final RecordStructure recStr;
+    private final Schema recStr;
     public MetaPage(int pageNum, BufferManager b){
         super(pageNum, META_PAGE_RECORD_SIZE, b);
-        recStr = new RecordStructure();
+        recStr = new Schema();
         recStr.addField("half_full_loc", "int");
 //        recStr.addField("full_loc", "int");
     }

@@ -26,7 +26,7 @@ package FilesAndAccess;
 import BufferManager.BufferManager;
 import DiskSpaceManager.Page;
 import SettingsAndMeta.GlobalConsts;
-import SettingsAndMeta.RecordStructure;
+import SettingsAndMeta.Schema;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
@@ -92,7 +92,7 @@ public class HeapPage extends GlobalConsts{
         buf.unpin(pid);
     }
        
-    public Record getRecord(RecordStructure struc, Record.Rid rid){
+    public Record getRecord(Schema struc, Record.Rid rid){
         Record r = new Record(struc);
         Page p = buf.getPage(pid);
         

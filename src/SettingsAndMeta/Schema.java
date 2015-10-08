@@ -31,12 +31,12 @@ import java.util.Map;
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class RecordStructure extends GlobalConsts{
+public class Schema extends GlobalConsts{
 
     private final Map<String, Map.Entry<String, Integer>> fields;
     private int recordSize;
 
-    public RecordStructure() {
+    public Schema() {
         fields = new HashMap<>();
     }
     

@@ -50,6 +50,12 @@ public class MetaPage extends HeapPage{
     public void setHalfFull(int id){
         setInt(id, META_HALF_FULL_LOC);
     }
+    public void setTotalRecs(int id){
+        setInt(id, META_TOTAL_RECS_LOC);
+    }
+    public int getTotalRecs(){
+        return getInt(META_TOTAL_RECS_LOC);
+    }
     private int getInt(int sid){
         Record rec = new Record(recStr);
         rec.setRid(pid, sid);

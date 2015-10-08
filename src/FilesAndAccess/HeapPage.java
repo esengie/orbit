@@ -72,6 +72,9 @@ public class HeapPage extends GlobalConsts{
         free -= p.getSize() - slotsPosition;
         p.commitFree(free);
         
+        slots.clear();
+        commitBits(p);
+        
         buf.setDirty(pid);
         buf.unpin(pid);
     }
@@ -95,9 +98,9 @@ public class HeapPage extends GlobalConsts{
     public Record getRecord(Schema struc, Record.Rid rid){
         Record r = new Record(struc);
         Page p = buf.getPage(pid);
-        
+
         p.buff.position(Page.page_offset + recordSize * rid.sid);
-        
+
         ByteBuffer buftmp = p.buff.duplicate();
         buftmp.limit(buftmp.position() + recordSize);
         r.buff.put(buftmp);
@@ -117,7 +120,9 @@ public class HeapPage extends GlobalConsts{
         buf.setDirty(pid);
         buf.unpin(pid);
     }
-    
+    public int getNextOccupiedSlot(int pos){
+        return slots.nextSetBit(pos);
+    }
     public int getFreeSlotsNum(){
         return free / recordSize;
     }
@@ -134,13 +139,12 @@ public class HeapPage extends GlobalConsts{
     protected void insertRecordAtPos(Record rec, int pos){
         Page p = buf.getPage(pid);
         
-        int i = pos;
-        p.buff.position(Page.page_offset + recordSize * i);
-        rec.setRid(p.getId(), i);
+        p.buff.position(Page.page_offset + recordSize * pos);
+//        rec.setRid(p.getId(), i);
         rec.buff.position(0);
         p.buff.put(rec.buff);
         free -= recordSize;
-        slots.flip(i);
+        slots.flip(pos);
         p.commitFree(free);
         commitBits(p);
         

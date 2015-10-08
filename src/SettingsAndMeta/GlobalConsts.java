@@ -48,4 +48,5 @@ public class GlobalConsts {
     protected static final int META_PAGE_RECORD_SIZE = 4;
     protected static final int META_HALF_FULL_LOC = 0;
     protected static final int META_FULL_LOC = 1;
+    protected static final int META_TOTAL_RECS_LOC = 2;
 }

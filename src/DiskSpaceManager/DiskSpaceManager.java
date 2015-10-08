@@ -87,7 +87,7 @@ public class DiskSpaceManager extends GlobalConsts {
             mFile.seek((long) (i * fPage.getSize()));
             mFile.writeInt(i-1); // set Prev
         }
-        // here we don't write next because it's zero
+        mFile.writeInt(0);
         mSize += num;
         fPage.setPrev(mSize - 1);
     }
@@ -149,7 +149,10 @@ public class DiskSpaceManager extends GlobalConsts {
         try {
             mFile = new RandomAccessFile(fName, "rw");  //open connection
             fPage = readPage(0);
+            fPage.setNext(0);
+            fPage.setPrev(0);
             fPage.setInitialFree();
+            writePage(fPage);
         } catch (IOException except) {
             throw new RuntimeException("Well, error! (creating db)");
         }

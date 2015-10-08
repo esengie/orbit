@@ -39,48 +39,61 @@ public class HeapFile implements Iterable<Record>{
     protected final int myFull;
     protected final int myPartial;
     private final Schema schema;
+    private int myTotalRecs;
 
     DiskSpaceManager ptrDSM;
     BufferManager ptrBufM;
     Catalogue ptrCat;
     
     
+    @Override
     public Iterator<Record> iterator() {
-        return new Scanner(myFull, myPartial, schema, ptrBufM);
+        return new Scanner(myFull, myPartial, myTotalRecs, schema, ptrBufM);
     }
     private class Scanner implements Iterator<Record>{
-        private int myFull;
-        private final int myPartial;
+        private int mFull;
+        private final int mPartial;
+        private final int recSize;
         private final Schema schema;
         private int curPid;
         private int curSid;
-        public Scanner(int full, int part, Schema sch, BufferManager buf){
-            myFull = full;
-            myPartial = part;
+        private int notScanned;
+        private final BufferManager bufPtr;
+        public Scanner(int full, int part, int total, Schema sch, BufferManager buf){
+            mFull = full;
+            mPartial = part;
+            recSize = sch.getRecordSize();
             schema = sch;
-            HeapPage p = new HeapPage(myFull, schema.getRecordSize(), buf);
-            curPid = p.getNext();
-            curSid = 0;
-            if (curPid == myFull){
-                p = new HeapPage(myPartial, schema.getRecordSize(), buf);
-                curPid = p.getNext();
-                myFull = 0;
-            }
-        }
-        private boolean hasNextPage(int val){
-            HeapPage p = new HeapPage(curPid, curSid, val)
-            if (myFull != 0 || curPid != myPartial);
+            bufPtr = buf;
+            notScanned = total;
+            
+            curPid = mFull;
+            curSid = 100000000;
         }
         @Override
         public boolean hasNext() {
-            return true;
+            return notScanned != 0;
         }
         @Override
         public Record next() {
             if(hasNext()) {
-                
-                Record rec = 
-                return rec;
+                HeapPage p = new HeapPage(curPid, recSize, bufPtr);
+                if (p.getNextOccupiedSlot(curSid) == -1){
+                    curPid = p.getNext();
+                    if (mFull != -1 && curPid == mFull){
+                        mFull = -1;
+                        p = new HeapPage(myPartial, recSize, bufPtr);
+                        curPid = p.getNext();
+                    }
+                    curSid = 0;
+                    p = new HeapPage(curPid, recSize, bufPtr);
+                } else {
+                    curSid = p.getNextOccupiedSlot(curSid);
+                }
+                Record tmp = new Record(schema);
+                tmp.setRid(curPid, curSid);
+                --notScanned;
+                return p.getRecord(schema, tmp.getRid());
             }
             throw new IllegalAccessError("Doesn't have next");
         }
@@ -99,8 +112,11 @@ public class HeapFile implements Iterable<Record>{
         metaPage.create();
         int halfFull = dsk.allocatePage();
         int full = dsk.allocatePage();
+//        System.out.println(full);
+//        System.out.println(halfFull);
         metaPage.setHalfFull(halfFull);
         metaPage.setFull(full);
+        metaPage.setTotalRecs(0);
         return tmp;
     }
 
@@ -112,6 +128,7 @@ public class HeapFile implements Iterable<Record>{
         schema = rec;
         myFull = metaPage.getFull();
         myPartial = metaPage.getHalfFull();
+        myTotalRecs = metaPage.getTotalRecs();
     }
 
     public void insertRecord(Record rec) {
@@ -135,6 +152,7 @@ public class HeapFile implements Iterable<Record>{
                 movePage(myFull, mine.pid);
             }
         }
+        metaPage.setTotalRecs(++myTotalRecs);
     }
     public Record getRecord(Record.Rid rid){
         HeapPage p = getHeapPage(rid.pid);
@@ -153,6 +171,7 @@ public class HeapFile implements Iterable<Record>{
                 ptrDSM.deallocatePage(rid.pid);
             }
         }
+        metaPage.setTotalRecs(--myTotalRecs);
     }
     private void movePage(int to, int pid){
         HeapPage toP = getHeapPage(to);

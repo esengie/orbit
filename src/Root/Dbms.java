@@ -32,7 +32,9 @@ import DiskSpaceManager.Page;
 import FilesAndAccess.HeapFile;
 //import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 //import java.util.Map.Entry;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -47,7 +49,7 @@ public class Dbms {
     BufferManager buf;
     Schema struc;
     HeapFile any;
-    
+
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -63,41 +65,40 @@ public class Dbms {
         buf = new BufferManager(5);
         buf.setManager(f);
         f.createDB("atari.txt");
-        
+
         struc = new Schema();
-        struc.addField("fap", "Int");
-        struc.addCharField("lap", 22);
-        
-        ArrayList<Integer> arr = new ArrayList<>();
+//        struc.addField("fap", "Int");
+        struc.addCharField("lap", 8);
+
         int met = HeapFile.create(f, buf);
-//        System.out.println(met);
         any = new HeapFile(f, buf, met, struc);
-        byte[] er; 
-        for (Integer i = 0; i < 6000; ++i){
-//            arr.add(f.allocatePage()); // --usage
-//            Integer temp = arr.get(i);
-            String s = new String("ffffffffffffffffffffffffffffffffff");
-            er = hexStringToByteArray(s);
-            
-            
-            
-//            HeapPage p = new HeapPage(temp, er.length, buf);   // --usage, it is pinned
-//            p.create();
+        byte[] er;
+        String s = new String("abcdef");
+        er = hexStringToByteArray(s);
+        int cnt = 0;
+        for (Integer i = 0; i < 200; ++i) {
             Record rec = new Record(struc);
+            rec.buff.putInt(123123);
+            rec.buff.putInt(124);
             any.insertRecord(rec);
-//            rec.buff.position(0);
-//            rec.buff.put(er);
-//            p.insertRecord(rec);
+        }
+        int trop = 5;
+        for (Record rec : any) {
+            if (trop>200){
+                System.out.println(rec.buff.getInt(0));
+                System.out.println(rec.buff.getInt(4));
+            }
+            ++trop;
         }
 //        Page pa = buf.getPage(8);
 //        pa = buf.getPage(pa.getPrev());
 //        System.out.println(pa.getPrev());
 //        
-        
-//        any.destroy();
+
+        any.destroy();
         buf.flushAll(); // --usage
         f.closeDB();
-   
+
     }
 
     public static void main(String[] args) {

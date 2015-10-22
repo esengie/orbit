@@ -24,17 +24,13 @@
 package Root;
 
 import SettingsAndMeta.Schema;
-import FilesAndAccess.HeapPage;
 import FilesAndAccess.Record;
 import BufferManager.BufferManager;
 import DiskSpaceManager.DiskSpaceManager;
-import DiskSpaceManager.Page;
 import FilesAndAccess.HeapFile;
+import SettingsAndMeta.Catalogue;
 //import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 //import java.util.Map.Entry;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -45,36 +41,36 @@ import java.util.Arrays;
  */
 public class Dbms {
 
-    DiskSpaceManager f;
+    DiskSpaceManager disk;
     BufferManager buf;
     Schema struc;
     HeapFile any;
+    Catalogue cat;
 
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
+    public void create(String name){
+        disk.createDB(name);
+        cat.create();
     }
-
+    public void open(String name){
+        disk.openDB(name);
+        cat.load();
+    }
     Dbms() throws IOException {
-        f = new DiskSpaceManager();
+        disk = new DiskSpaceManager();
         buf = new BufferManager(5);
-        buf.setManager(f);
-        f.createDB("atari.txt");
+        buf.setManager(disk);
+        cat = new Catalogue(disk, buf);
+        
+//        create("atari.txt");
+        open("atari.txt");
 
         struc = new Schema();
-//        struc.addField("fap", "Int");
+        struc.addField("fap", "Int");
         struc.addCharField("lap", 8);
 
-        int met = HeapFile.create(f, buf);
-        any = new HeapFile(f, buf, met, struc);
-        byte[] er;
-        String s = new String("abcdef");
-        er = hexStringToByteArray(s);
+//        any = cat.createTable("Donkey", struc);
+        
+        any = cat.getTable("Donkey");
         int cnt = 0;
         for (Integer i = 0; i < 200; ++i) {
             Record rec = new Record(struc);
@@ -95,9 +91,9 @@ public class Dbms {
 //        System.out.println(pa.getPrev());
 //        
 
-        any.destroy();
+//        cat.dropTable("Donkey");
         buf.flushAll(); // --usage
-        f.closeDB();
+        disk.closeDB();
 
     }
 

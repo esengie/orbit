@@ -40,6 +40,8 @@ public class GlobalConsts {
     // Disk Space manager consts
     protected static final int DBMS_FILE_MAX_SIZE = 1000000;
     protected static final int EXTEND_DB = 10;
+    protected static final int M_SIZE = page_offset;
+    protected static final int FREE_PAGES = M_SIZE + 4;
     // Buffer Manager consts
     protected static final int BUFF_DEFAULT_PAGES = 200;
     protected static final int BUFF_DEFAULT_MIN_PAGES = 5;
@@ -49,4 +51,9 @@ public class GlobalConsts {
     protected static final int META_HALF_FULL_LOC = 0;
     protected static final int META_FULL_LOC = 1;
     protected static final int META_TOTAL_RECS_LOC = 2;
+    // Catalogue consts
+    protected static final int META_SCHEMA_PAGE = 1;
+    protected static final int META_META_PAGE = 4;
+    protected static final int MAX_NAME_SIZE = 25;
+    
 }

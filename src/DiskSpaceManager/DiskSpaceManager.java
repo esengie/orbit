@@ -65,6 +65,7 @@ public class DiskSpaceManager extends GlobalConsts {
                 writePage(local);
                 
                 --freePages;
+                fPage.setInt(FREE_PAGES, freePages);
             } catch (IOException ex) {
                 throw new IllegalStateException("Read page error on allocate; allocate aborted", ex);
             }
@@ -76,7 +77,8 @@ public class DiskSpaceManager extends GlobalConsts {
     private void extendDb(int num) throws IOException {
         // updates free pool
         freePages += num;
-
+        fPage.setInt(FREE_PAGES, freePages);
+        
         fPage.setNext(mSize);
         mFile.seek((long) (mSize * fPage.getSize()));
         mFile.writeInt(0); // set Prev
@@ -89,6 +91,7 @@ public class DiskSpaceManager extends GlobalConsts {
         }
         mFile.writeInt(0);
         mSize += num;
+        fPage.setInt(M_SIZE, mSize);
         fPage.setPrev(mSize - 1);
     }
     public void deallocatePage(int pageId){
@@ -107,6 +110,7 @@ public class DiskSpaceManager extends GlobalConsts {
                 fPage.setNext(local.getId());
                 writePage(fPage);
                 ++freePages;
+                fPage.setInt(FREE_PAGES, freePages);
             } catch (RuntimeException ex) {
                 throw new IllegalStateException("Error during deallocation ", ex);
             }
@@ -152,6 +156,8 @@ public class DiskSpaceManager extends GlobalConsts {
             fPage.setNext(0);
             fPage.setPrev(0);
             fPage.setInitialFree();
+            fPage.setInt(FREE_PAGES, 0);
+            fPage.setInt(M_SIZE, 1);
             writePage(fPage);
         } catch (IOException except) {
             throw new RuntimeException("Well, error! (creating db)");
@@ -164,6 +170,8 @@ public class DiskSpaceManager extends GlobalConsts {
         try {
             mFile = new RandomAccessFile(fName, "rw");
             fPage = readPage(0);
+            mSize = fPage.getInt(M_SIZE);
+            freePages = fPage.getInt(FREE_PAGES);
         } catch (IOException except) {
             throw new RuntimeException("Well, error! (opening db)");
         }

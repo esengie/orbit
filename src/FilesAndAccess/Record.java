@@ -37,8 +37,10 @@ public class Record {
     }
     public ByteBuffer buff;
     private final Rid rid;
+    private final Schema schema;
     
     public Record(Schema str){
+        schema = str;
         buff = ByteBuffer.allocate(str.getRecordSize());
         rid = new Rid();
     }
@@ -48,6 +50,43 @@ public class Record {
     }
     public Rid getRid(){
         return rid;
+    }
+    public String getString(String name){
+        int p  = schema.getPos(name);
+        int sz = schema.getSize(name);
+        char ret[] = new char[sz];
+        buff.position(p);
+        int i = 0;
+        for (i = 0; i < sz; ++i){
+            ret[i] = buff.getChar();
+            if (ret[i] == 0) break;
+        }
+        return new String(ret, 0, i);
+    }
+    public void putString(String name, String s){
+        int p  = schema.getPos(name);
+        int sz = schema.getSize(name);
+        char ret[] = s.toCharArray();
+        buff.position(p);
+        for (int i = 0; i < s.length(); ++i){
+            buff.putChar(ret[i]);
+        }
+    }
+    public int getInt(String name){
+        int p  = schema.getPos(name);
+        return buff.getInt(p);
+    }
+    public void putInt(String name, int v){
+        int p  = schema.getPos(name);
+        buff.putInt(p, v);
+    }
+    public double getDouble(String name){
+        int p  = schema.getPos(name);
+        return buff.getDouble(p);
+    }
+    public void putDouble(String name, double v){
+        int p  = schema.getPos(name);
+        buff.putDouble(p, v);
     }
 }
 

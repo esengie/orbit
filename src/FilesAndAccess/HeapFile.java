@@ -25,7 +25,6 @@ package FilesAndAccess;
 
 import BufferManager.BufferManager;
 import DiskSpaceManager.DiskSpaceManager;
-import SettingsAndMeta.Catalogue;
 import SettingsAndMeta.Schema;
 import java.util.Iterator;
 
@@ -43,7 +42,7 @@ public class HeapFile implements Iterable<Record>{
 
     DiskSpaceManager ptrDSM;
     BufferManager ptrBufM;
-    Catalogue ptrCat;
+//    Catalogue ptrCat;
     
     
     @Override
@@ -130,7 +129,14 @@ public class HeapFile implements Iterable<Record>{
         myPartial = metaPage.getHalfFull();
         myTotalRecs = metaPage.getTotalRecs();
     }
-
+    public boolean contains(Record rec){
+        for (Record item : this){
+            if (item.equals(rec)){
+                return true;
+            }
+        }
+        return false;
+    }
     public void insertRecord(Record rec) {
         HeapPage myP = getHeapPage(myPartial);
         HeapPage mine;

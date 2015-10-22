@@ -31,6 +31,8 @@ import FilesAndAccess.HeapFile;
 import SettingsAndMeta.Catalogue;
 //import dbms.DiskSpaceManager.Page;
 import java.io.IOException;
+import java.util.BitSet;
+import java.util.Iterator;
 //import java.util.Map.Entry;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -61,30 +63,35 @@ public class Dbms {
         buf.setManager(disk);
         cat = new Catalogue(disk, buf);
         
-//        create("atari.txt");
-        open("atari.txt");
+        create("atari.txt");
+//        open("atari.txt");
 
         struc = new Schema();
         struc.addField("fap", "Int");
-        struc.addCharField("lap", 8);
+        struc.addField("lap", "int");
 
-//        any = cat.createTable("Donkey", struc);
+        any = cat.createTable("Donkey", struc);
         
-        any = cat.getTable("Donkey");
+//        any = cat.getTable("Donkey");
         int cnt = 0;
-        for (Integer i = 0; i < 200; ++i) {
+        for (Integer i = 0; i < 1000; ++i) {
             Record rec = new Record(struc);
-            rec.buff.putInt(123123);
-            rec.buff.putInt(124);
+            rec.putInt("fap", i);
+            rec.putInt("lap", 0);
             any.insertRecord(rec);
         }
-        int trop = 5;
-        for (Record rec : any) {
-            if (trop>200){
-                System.out.println(rec.buff.getInt(0));
-                System.out.println(rec.buff.getInt(4));
+//        int trop = 5;
+        Iterator<Record> it = any.iterator();
+        while(it.hasNext()) {
+            Record rec = it.next();
+            if (rec.getInt("fap") % 5 == 0){
+                System.out.println(rec.getInt("fap"));
+                it.remove();
             }
-            ++trop;
+        }
+        System.out.println("________________");
+        for (Record rec : any){
+            System.out.println(rec.getInt("fap"));
         }
 //        Page pa = buf.getPage(8);
 //        pa = buf.getPage(pa.getPrev());
@@ -93,7 +100,8 @@ public class Dbms {
 
 //        cat.dropTable("Donkey");
         buf.flushAll(); // --usage
-        disk.closeDB();
+//        disk.closeDB();
+        disk.deleteDB();
 
     }
 

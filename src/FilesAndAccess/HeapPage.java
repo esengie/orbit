@@ -51,14 +51,15 @@ public class HeapPage extends GlobalConsts{
         buf = b;
         Page p = buf.getPage(pid);
         free = p.getFree();
-        // + 1 because need to store this bitset also
-        int number_of_slots = (p.getSize() - Page.page_offset) * 8 / (8 * recordSize + 1); 
-        slotsPosition = p.getSize() - (number_of_slots + 7) / 8;
+        // + 1 because need to store this bitset also. -1 just to have enough space
+        int number_of_slots = (p.getSize() - Page.page_offset) * 8 / (8 * recordSize + 1) - 1; 
+        // -1 to not hav buffer overflow
+        slotsPosition = p.getSize() - (number_of_slots + 7) / 8 - 1;
         p.buff.position(slotsPosition);
         
         ByteBuffer buftmp = p.buff.duplicate();
         // not - 7, because we could have more bits than we have memory
-        buftmp.limit (buftmp.position() + (number_of_slots) / 8); 
+        buftmp.limit (buftmp.position() + (number_of_slots + 7) / 8); 
         slots = BitSet.valueOf(buftmp);
         
         buf.setDirty(pid);
@@ -98,6 +99,7 @@ public class HeapPage extends GlobalConsts{
     public Record getRecord(Schema struc, Record.Rid rid){
         Record r = new Record(struc);
         Page p = buf.getPage(pid);
+        r.setRid(rid.pid, rid.sid);
 
         p.buff.position(Page.page_offset + recordSize * rid.sid);
 

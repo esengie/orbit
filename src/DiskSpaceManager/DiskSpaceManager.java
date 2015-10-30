@@ -139,6 +139,8 @@ public class DiskSpaceManager extends GlobalConsts {
             try {
                 mFile.seek((long) (page.getId() * page.getSize()));
                 mFile.write(page.buff.array());
+//                mFile.close();
+//                mFile = new RandomAccessFile(fName, "rw");
             } catch (IOException ex) {
                 throw new RuntimeException("Error while writing page");
             }

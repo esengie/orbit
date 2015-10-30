@@ -21,34 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package Root;
+package Indexes;
 
-import BufferManager.BufferManager;
-import DiskSpaceManager.DiskSpaceManager;
-import SettingsAndMeta.Catalogue;
+import FilesAndAccess.HeapFile;
+import java.util.ArrayList;
 
 /**
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class Dbms {
-
-    DiskSpaceManager disk;
-    public BufferManager buf;
-    public Catalogue cat;
-
-    public void create(String name){
-        disk.createDB(name);
-        cat.create();
+public class BTreeIndex extends Index {
+    public BTreeIndex(HeapFile myself, ArrayList<String> fields, HeapFile on) {
+        super(myself, fields, on);
     }
-    public void open(String name){
-        disk.openDB(name);
-        cat.load();
-    }
-    public Dbms() {
-        disk = new DiskSpaceManager();
-        buf = new BufferManager(500);
-        buf.setManager(disk);
-        cat = new Catalogue(disk, buf);
-    }
+    
 }

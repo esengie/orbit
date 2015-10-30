@@ -1,7 +1,7 @@
-/*
+/* 
  * The MIT License
  *
- * Copyright 2015 esengie.
+ * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,13 +37,23 @@ public class HeapFile implements Iterable<Record>{
     private final MetaPage metaPage;
     protected final int myFull;
     protected final int myPartial;
-    private final Schema schema;
+    private Schema schema;
     private int myTotalRecs;
 
     DiskSpaceManager ptrDSM;
     BufferManager ptrBufM;
-//    Catalogue ptrCat;
     
+    public Schema getSchema(){
+        return schema;
+    }
+    public void setSchema(Schema s){
+        if (schema.getRecordSize() == 0){
+            schema = s;
+        } else {
+            throw new IllegalAccessError("Schema was already set, this is a recipe for disaster!");
+        }
+    
+    }
     
     @Override
     public Iterator<Record> iterator() {
@@ -128,8 +138,6 @@ public class HeapFile implements Iterable<Record>{
         metaPage.create();
         int halfFull = dsk.allocatePage();
         int full = dsk.allocatePage();
-//        System.out.println(full);
-//        System.out.println(halfFull);
         metaPage.setHalfFull(halfFull);
         metaPage.setFull(full);
         metaPage.setTotalRecs(0);

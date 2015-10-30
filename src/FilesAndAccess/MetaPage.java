@@ -1,7 +1,7 @@
-/*
+/* 
  * The MIT License
  *
- * Copyright 2015 esengie.
+ * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ public class MetaPage extends HeapPage{
     public MetaPage(int pageNum, BufferManager b){
         super(pageNum, META_PAGE_RECORD_SIZE, b);
         recStr = new Schema();
-        recStr.addField("half_full_loc", "int");
+        recStr.createField("half_full_loc", "int");
 //        recStr.addField("full_loc", "int");
     }
     public int getHalfFull(){

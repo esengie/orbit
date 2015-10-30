@@ -39,6 +39,7 @@ public class Schema extends GlobalConsts implements Iterable<String> {
 
     public Schema() {
         fields = new HashMap<>();
+        recordSize = 0;
     }
 
     @Override
@@ -46,13 +47,17 @@ public class Schema extends GlobalConsts implements Iterable<String> {
         return fields.keySet().iterator();
     }
  
-    public int getRecordSize() {
+    public int getRecordSize(){
         return recordSize;
     }
-    public void addField(String name, String s){
-        recordSize += addField(name, s, recordSize);
+    public void createField(String name, String s){
+        recordSize += addField_helper(name, s, recordSize);
     }
-    public int addField(String name, String s, Integer pos) {
+    public void addField(String name, String s, int pos){
+        recordSize += addField_helper(name, s, pos);
+    }
+    public int addField_helper(String name, String s, Integer pos) {
+        s = s.replaceAll("_", "");
         if (s.length() < 7) {
             switch (s.toLowerCase()) {
                 case "int":
@@ -85,7 +90,7 @@ public class Schema extends GlobalConsts implements Iterable<String> {
         }
     }
 
-    public void addCharField(String name, int maxSize) {
+    public void createCharField(String name, int maxSize) {
         if (maxSize > 128) {
             throw new IllegalArgumentException("Your varchar is too big, max = 128");
         }

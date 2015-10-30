@@ -54,6 +54,7 @@ public class GlobalConsts {
     // Catalogue consts
     protected static final int META_SCHEMA_PAGE = 1;
     protected static final int META_META_PAGE = 4;
+    protected static final int META_INDEX_PAGE = 7;
     protected static final int MAX_NAME_SIZE = 25;
     
 }

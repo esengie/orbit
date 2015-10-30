@@ -1,7 +1,7 @@
-/*
+/* 
  * The MIT License
  *
- * Copyright 2015 esengie.
+ * Copyright 2015 Shamil Garifullin <shamil.garifullin at mit.spbau>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -113,6 +113,10 @@ public class HeapPage extends GlobalConsts{
     
     public void deleteRecord(Record.Rid rid){
         Page p = buf.getPage(pid);
+        
+        byte[] b = new byte[recordSize]; 
+        p.buff.position(Page.page_offset + recordSize * rid.sid);
+        p.buff.put(b);
         
         slots.flip(rid.sid);
         free += recordSize;

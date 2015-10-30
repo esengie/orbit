@@ -39,7 +39,7 @@ public class Page extends GlobalConsts {
         Id = id;
         buff = ByteBuffer.allocate(PAGE_SIZE);
     }
-
+    
     public int getId() {
         return Id;
     }
@@ -65,6 +65,9 @@ public class Page extends GlobalConsts {
         return getInt(PAGE_NEXT);
     }
     public void commitFree(int free){
+        if (free > PAGE_SIZE){
+            throw new IllegalStateException("Free is too big");
+        }
         setInt(PAGE_FREE, free);
     }
     // do not ever use this!

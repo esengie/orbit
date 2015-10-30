@@ -27,8 +27,8 @@ import BufferManager.BufferManager;
 import DiskSpaceManager.Page;
 import SettingsAndMeta.GlobalConsts;
 import SettingsAndMeta.Schema;
+import Utils.Bits;
 import java.nio.ByteBuffer;
-import java.util.BitSet;
 
 /**
  *
@@ -41,11 +41,11 @@ public class HeapPage extends GlobalConsts{
     private final int recordSize;
     private final int slotsPosition;
     private final int numberOfSlots;
-    private final BitSet slots;
+    private final Bits slots;
     private int free;
     
     BufferManager buf;
-    
+      
     public HeapPage(int pageNum, int rSize, BufferManager b){
         pid = pageNum;
         recordSize = rSize;
@@ -61,7 +61,12 @@ public class HeapPage extends GlobalConsts{
         ByteBuffer buftmp = p.buff.duplicate();
         // not - 7, because we could have more bits than we have memory
         buftmp.limit (buftmp.position() + (numberOfSlots + 7) / 8); 
-        slots = BitSet.valueOf(buftmp);
+        
+        slots = Bits.fromBytes(buftmp, numberOfSlots);
+        
+        if (slots.length()!= numberOfSlots){
+            throw new IllegalStateException(String.valueOf(slots.length()) + " " + String.valueOf(numberOfSlots));
+        }
         
         buf.setDirty(pid);
         buf.unpin(pid);
@@ -84,6 +89,11 @@ public class HeapPage extends GlobalConsts{
         Page p = buf.getPage(pid);
         
         int i = slots.nextClearBit(0);
+        
+        if (i == -1){
+            throw new IllegalStateException("Weird..shouldn't insert records bigger than allowed");
+        }
+        
         p.buff.position(Page.page_offset + recordSize * i);
         rec.setRid(p.getId(), i);
         rec.buff.position(0);
@@ -115,6 +125,10 @@ public class HeapPage extends GlobalConsts{
     public void deleteRecord(Record.Rid rid){
         Page p = buf.getPage(pid);
         
+        if (rid.sid > numberOfSlots){
+            throw new IllegalArgumentException("Sid is too big!");
+        }
+        
         byte[] b = new byte[recordSize]; 
         p.buff.position(Page.page_offset + recordSize * rid.sid);
         p.buff.put(b);
@@ -134,12 +148,12 @@ public class HeapPage extends GlobalConsts{
         return free / recordSize;
     }
     public int getOccupiedSlotsNum(){
-        return slots.size() - getFreeSlotsNum();
+        return slots.length() - getFreeSlotsNum();
     }
     
     private void commitBits(Page p){
         p.buff.position(slotsPosition);
-        p.buff.put(slots.toByteArray());
+        p.buff.put(Bits.toByteArray(slots));
     }
     /// Use with caution
     /// used only for MetaPage

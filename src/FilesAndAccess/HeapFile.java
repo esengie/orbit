@@ -68,7 +68,6 @@ public class HeapFile implements Iterable<Record>{
         private boolean nexted = false;
         public Scanner(){
             notScanned = myTotalRecs;
-            
             curPid = myPartial;
             curSid = 100000000;
             prevPid = curPid;

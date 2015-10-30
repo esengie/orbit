@@ -65,10 +65,11 @@ public class BufferManager extends GlobalConsts {   ///singleton
     private void pin(int pageId) {
         if (pinCount.containsKey(pageId)) {
             pinCount.put(pageId, pinCount.get(pageId) + 1);
-//            throw new IllegalStateException("How in the hell did i get pincount more than 1? "
-//                + String.valueOf(pageId));
-            return;
+            throw new IllegalStateException("How in the hell did i get pincount more than 1? "
+                + String.valueOf(pageId));
+//            return;
         }
+        
         pinCount.put(pageId, 1);
         if (pageFrame.size() > nPinned) {
             throw new RuntimeException("Unexpected to have more than 5% pinned pages");
@@ -94,7 +95,8 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 pageFrame.remove(pageId);
                 return;
             }
-            pinCount.put(pageId, temp - 1);            
+            pinCount.put(pageId, temp - 1);  
+            throw new IllegalStateException("We're single threaded so no double pinning");
         }
     }
 

@@ -96,9 +96,9 @@ public class DbmsTest {
     
     @After
     public void tearDown() {
-        db.cat.dropTable("Donkey");
-        db.cat.createTable("Donkey", struc);
-        db.close();
+//        db.cat.dropTable("Donkey");
+//        db.cat.createTable("Donkey", struc);
+//        db.close();
     }
     
     /**
@@ -118,13 +118,18 @@ public class DbmsTest {
             it.next();
             it.remove();
         }
-        for (Integer i = 0; i < 1000; ++i) {
+        for (Integer i = 0; i < 15; ++i) {
             Record rec = new Record(struc);
             rec.putInt("fap", i);
             rec.putInt("lap", 0);
             rec.putString("mishap", "asdas");
             any.insertRecord(rec);
         }
+        Record rec = new Record(struc);
+        rec.putInt("fap", 1111);
+        rec.putInt("lap", 0);
+        rec.putString("mishap", "asdas");
+        any.insertRecord(rec);
     }
 //
 //    

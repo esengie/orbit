@@ -199,14 +199,15 @@ public class HeapFile implements Iterable<Record>{
         } else {
             if (p.getOccupiedSlotsNum() == 0){
                 wipeFromList(rid.pid);
-                ptrBufM.unsetDirty(rid.pid);
-                ptrDSM.deallocatePage(rid.pid);
+                p.setDeleted();
             }
         }
         metaPage.setTotalRecs(--myTotalRecs);
     }
+    // Эта функция нужна для remove с помощью итератора
+    // Также наверное для индексов (хотя может буду его перестраивать)
     private void claimSpace(){
-        
+        throw new UnsupportedOperationException("Didn't implement claimspace yet");
     }
     private HeapPage wipeFromList(int pid){
         HeapPage moved = getHeapPage(pid);
@@ -235,21 +236,19 @@ public class HeapFile implements Iterable<Record>{
         while (myFull != iter.getNext()){
             tmp = getHeapPage(iter.getNext());
             iter.setNext(tmp.getNext());
-            ptrBufM.unsetDirty(tmp.pid);
-            ptrDSM.deallocatePage(tmp.pid);
+            tmp.setDeleted();
         }        
         iter = getHeapPage(myPartial);
         while (myPartial != iter.getNext()){
             tmp = getHeapPage(iter.getNext());
             iter.setNext(tmp.getNext());
-            ptrBufM.unsetDirty(tmp.pid);
-            ptrDSM.deallocatePage(tmp.pid);
+            tmp.setDeleted();
         }
-        ptrBufM.unsetDirty(myFull);
-        ptrDSM.deallocatePage(myFull);
-        ptrBufM.unsetDirty(myPartial);
-        ptrDSM.deallocatePage(myPartial);
-        ptrBufM.unsetDirty(metaPage.pid);
-        ptrDSM.deallocatePage(metaPage.pid);
+        tmp = getHeapPage(myFull);
+        tmp.setDeleted();
+        tmp = getHeapPage(myPartial);
+        tmp.setDeleted();
+        tmp = getHeapPage(metaPage.pid);
+        tmp.setDeleted();
     }
 }

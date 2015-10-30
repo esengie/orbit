@@ -35,8 +35,7 @@ public class MetaPage extends HeapPage{
     public MetaPage(int pageNum, BufferManager b){
         super(pageNum, META_PAGE_RECORD_SIZE, b);
         recStr = new Schema();
-        recStr.createField("half_full_loc", "int");
-//        recStr.addField("full_loc", "int");
+        recStr.createField("half_full_loc", "int"); // Dirty hack to use one Int as a record
     }
     public int getHalfFull(){
         return getInt(META_HALF_FULL_LOC);

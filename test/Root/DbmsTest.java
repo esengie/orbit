@@ -72,8 +72,8 @@ public class DbmsTest {
         struc = new Schema();
         struc.createField("fap", "int");
         struc.createCharField("mishap", 120);
-        struc.createCharField("mishaap", 120);
-        struc.createCharField("mish2ap", 120);
+//        struc.createCharField("mishaap", 120);
+//        struc.createCharField("mish2ap", 120);
         struc.createField("lap", "Int");
         db.create("atari.txt");
         db.cat.createTable("Donkey", struc);
@@ -104,7 +104,7 @@ public class DbmsTest {
     /**
      * Test of create heapfile iterate and remove.
      */
-        @Test
+    @Test
     public void testCreate() {
         for (Integer i = 0; i < 1000; ++i) {
             Record rec = new Record(struc);
@@ -166,18 +166,18 @@ public class DbmsTest {
 //        assertEquals(1000, set.size());
 //    }
 
-    @Test
-    public void testDropTables() {
-        db.cat.createTable("asd", struc);
-        db.cat.dropTable("asd");
-        db.cat.createTable("asd", struc);
-        db.cat.createTable("asds", struc);
-        db.cat.dropTable("asds");
-        System.out.println("Tables as of now:");
-        for (Record r : db.cat.metaPages){
-            System.out.println("  " + r.getString("table_name"));
-        }
-    }
+//    @Test
+//    public void testDropTables() {
+//        db.cat.createTable("asd", struc);
+//        db.cat.dropTable("asd");
+//        db.cat.createTable("asd", struc);
+//        db.cat.createTable("asds", struc);
+//        db.cat.dropTable("asds");
+//        System.out.println("Tables as of now:");
+//        for (Record r : db.cat.metaPages){
+//            System.out.println("  " + r.getString("table_name"));
+//        }
+//    }
 //    @Test
 //    public void testSameNameIndices() {
 //        expectedEx.expect(IllegalArgumentException.class);

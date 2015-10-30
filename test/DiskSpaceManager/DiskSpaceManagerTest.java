@@ -88,9 +88,13 @@ public class DiskSpaceManagerTest {
             assertEquals(2, k);
             k = db.allocatePage();
             assertEquals(3, k);
-            // Warn against dirty!
-            db.deallocatePage(2);
-            db.deallocatePage(1);
+            // Testing out deleted
+            Page kk = db.readPage(2);
+            kk.setDeleted();
+            db.writePage(kk);
+            kk = db.readPage(1);
+            kk.setDeleted();
+            db.writePage(kk);
             k = db.allocatePage();
             assertEquals(1, k);
         }

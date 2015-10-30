@@ -65,6 +65,8 @@ public class BufferManager extends GlobalConsts {   ///singleton
     private void pin(int pageId) {
         if (pinCount.containsKey(pageId)) {
             pinCount.put(pageId, pinCount.get(pageId) + 1);
+//            throw new IllegalStateException("How in the hell did i get pincount more than 1? "
+//                + String.valueOf(pageId));
             return;
         }
         pinCount.put(pageId, 1);
@@ -92,9 +94,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 pageFrame.remove(pageId);
                 return;
             }
-            pinCount.put(pageId, temp - 1);
-            throw new IllegalStateException("How in the hell did i get pincount more than 1? "
-                + String.valueOf(pageId));
+            pinCount.put(pageId, temp - 1);            
         }
     }
 
@@ -103,29 +103,22 @@ public class BufferManager extends GlobalConsts {   ///singleton
             dirty.put(pageId, Boolean.TRUE);
         }
     }
-     public void unsetDirty(int pageId) {
-        if (dirty.containsKey(pageId)){
-            dirty.remove(pageId);
-        }
-        if (lru.containsKey(pageId)){
-            lru.remove(pageId);
-        }
-        if (lru.containsKey(pageId) || dirty.containsKey(pageId) || pageFrame.containsKey(pageId)){
-            throw new IllegalStateException("Wellllllllllll");
-        }
-    }
 
     public void flushAll() {
         Page p = null;
+        int i = -1;
         try {
             for (Entry<Integer, Boolean> elem : dirty.entrySet()) {
+                i = elem.getKey();
                 p = lru.get(elem.getKey());
-//                if (p != null){
-                    diskManager.writePage(p);
-//                }
+                if (p == null){
+                    throw new RuntimeException("Well, error! (flushing buffer)");
+                }
+                diskManager.writePage(p);
             }
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Well, error! (flushing buffer)");
+            throw new RuntimeException("Flushing buffer error, no page in lru with number "
+                    + String.valueOf(i) + " (is it pinned?)" + String.valueOf(pageFrame.containsKey(i)));
         }
     }
 

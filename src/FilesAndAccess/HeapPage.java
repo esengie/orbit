@@ -180,7 +180,25 @@ public class HeapPage extends GlobalConsts{
     public void setPrev(int id){
         Page p = buf.getPage(pid);
         p.setPrev(id);
-        
+        buf.setDirty(pid);
+        buf.unpin(pid);
+    }
+    public boolean getDeleted(){
+        Page p = buf.getPage(pid);
+        // На самом деле пофиг в каком порядке анпиним, все же ожнопоточное
+        boolean res = p.getDeleted();
+        buf.unpin(pid);
+        return res;
+    }
+    public void setDeleted(){
+        Page p = buf.getPage(pid);
+        p.setDeleted();
+        buf.setDirty(pid);
+        buf.unpin(pid);
+    }
+    public void clearDeleted(){
+        Page p = buf.getPage(pid);
+        p.clearDeleted();
         buf.setDirty(pid);
         buf.unpin(pid);
     }

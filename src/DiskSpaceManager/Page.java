@@ -74,11 +74,14 @@ public class Page extends GlobalConsts {
     public int getFree(){
         return getInt(PAGE_FREE);
     }
+    public boolean getDeleted(){
+        return buff.get(PAGE_DELETED) != 0;
+    }
     public void setDeleted(){
         byte l = 1;
         buff.put(PAGE_DELETED, l);
     }
-    public void unsetDeleted(){
+    public void clearDeleted(){
         byte l = 0;
         buff.put(PAGE_DELETED, l);
     }

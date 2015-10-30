@@ -93,10 +93,8 @@ public class DiskSpaceManager extends GlobalConsts {
         fPage.setInt(M_SIZE, mSize);
         fPage.setPrev(mSize - 1);
     }
-    public void deallocatePage(int pageId){
-        if (pageId > 0 && pageId < mSize) {
+    private void deallocatePage(Page local){
             try {
-                Page local = readPage(pageId);
                 local.setNext(fPage.getNext());
                 local.setPrev(fPage.getId());
                 local.setInitialFree();
@@ -113,12 +111,7 @@ public class DiskSpaceManager extends GlobalConsts {
             } catch (RuntimeException ex) {
                 throw new IllegalStateException("Error during deallocation ", ex);
             }
-
-        } else {
-            throw new IllegalArgumentException("Invalid deallocate index out of bounds; aborted");
-        }
     }
-
     public Page readPage(int pageId){
         if (pageId >= 0 && pageId < mSize) {
             try {
@@ -135,11 +128,13 @@ public class DiskSpaceManager extends GlobalConsts {
     }
     public void writePage(Page page){
         if (page.getId() >= 0 && page.getId() < mSize) {
+            if (page.getDeleted()){
+                page.clearDeleted();
+                deallocatePage(page);
+            }
             try {
                 mFile.seek((long) (page.getId() * page.getSize()));
                 mFile.write(page.buff.array());
-//                mFile.close();
-//                mFile = new RandomAccessFile(fName, "rw");
             } catch (IOException ex) {
                 throw new RuntimeException("Error while writing page");
             }

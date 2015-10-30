@@ -71,7 +71,9 @@ public class DbmsTest {
         db = new Dbms();
         struc = new Schema();
         struc.createField("fap", "int");
-        struc.createCharField("mishap", 12);
+        struc.createCharField("mishap", 120);
+        struc.createCharField("mishaap", 120);
+        struc.createCharField("mish2ap", 120);
         struc.createField("lap", "Int");
         db.create("atari.txt");
         db.cat.createTable("Donkey", struc);
@@ -80,8 +82,8 @@ public class DbmsTest {
     
     @AfterClass
     public static void tearDownClass() {
-//        db.open("atari.txt");
-//        db.disk.deleteDB();
+        db.open("atari.txt");
+        db.disk.deleteDB();
     }
     
     @Before
@@ -96,13 +98,36 @@ public class DbmsTest {
     public void tearDown() {
         db.cat.dropTable("Donkey");
         db.cat.createTable("Donkey", struc);
-        db.buf.flushAll();
-        db.disk.closeDB();
+        db.close();
     }
     
     /**
      * Test of create heapfile iterate and remove.
      */
+        @Test
+    public void testCreate() {
+        for (Integer i = 0; i < 1000; ++i) {
+            Record rec = new Record(struc);
+            rec.putInt("fap", i);
+            rec.putInt("lap", 0);
+            rec.putString("mishap", "asdas");
+            any.insertRecord(rec);
+        }
+        Iterator<Record> it = any.iterator();
+        while(it.hasNext()) {
+            it.next();
+            it.remove();
+        }
+        for (Integer i = 0; i < 1000; ++i) {
+            Record rec = new Record(struc);
+            rec.putInt("fap", i);
+            rec.putInt("lap", 0);
+            rec.putString("mishap", "asdas");
+            any.insertRecord(rec);
+        }
+    }
+//
+//    
 //    @Test
 //    public void testCreate() {
 //        System.out.println("create, iterate, remove");
@@ -124,53 +149,60 @@ public class DbmsTest {
 //        Set set = new HashSet();
 //        for (Record rec : any){
 //            set.add(rec.getInt("fap"));
+//            assertTrue("asdas".equals(rec.getString("mishap")));
 //            assertTrue(rec.getInt("fap")%5 != 0);
 //        }
 //        assertEquals(800, set.size());
+//        for (Integer i = 0; i < 1000; ++i) {
+//            Record rec = new Record(struc);
+//            rec.putInt("fap", i);
+//            rec.putInt("lap", 0);
+//            rec.putString("mishap", "asdas");
+//            any.insertRecord(rec);
+//        }
+//        for (Record rec : any){
+//            set.add(rec.getInt("fap"));
+//        }
+//        assertEquals(1000, set.size());
 //    }
 
     @Test
-    public void testSameBases() {
-//        expectedEx.expect(IllegalArgumentException.class);
-//        expectedEx.expectMessage("Same name index already exists!");
+    public void testDropTables() {
         db.cat.createTable("asd", struc);
-        db.cat.createTable("asds", struc);
         db.cat.dropTable("asd");
         db.cat.createTable("asd", struc);
+        db.cat.createTable("asds", struc);
         db.cat.dropTable("asds");
+        System.out.println("Tables as of now:");
         for (Record r : db.cat.metaPages){
-            System.out.println(r.getString("table_name"));
+            System.out.println("  " + r.getString("table_name"));
         }
-        
     }
-    @Test
-    public void testSameNameIndices() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Same name index already exists!");
-        fields.add("lap");
-        db.cat.createIndex("Donkey_aaaaa", "Donkey", fields, Index.IndexType.BTREE);
-        db.cat.createIndex("Donkey_aaaaa", "Donkey", fields, Index.IndexType.BTREE);
-        
-    }
-    /**
-     * Test of create heapfile iterate and remove.
-     */
-    @Test
-    public void testSameFuncIndices() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Same function index already exists! Named: Donkey_i");
-        db.cat.createIndex("Donkey_i", "Donkey", fields, Index.IndexType.BTREE); 
-        for (Record r : db.cat.indices){
-            String tst = r.getString("index_name");
-            System.out.println(tst);
-        }
-        db.cat.createIndex("Donkey_g", "Donkey", fields, Index.IndexType.BTREE);
-    }
+//    @Test
+//    public void testSameNameIndices() {
+//        expectedEx.expect(IllegalArgumentException.class);
+//        expectedEx.expectMessage("Same name index already exists!");
+//        fields.add("lap");
+//        db.cat.createIndex("Donkey_aaaaa", "Donkey", fields, Index.IndexType.BTREE);
+//        db.cat.createIndex("Donkey_aaaaa", "Donkey", fields, Index.IndexType.BTREE);
+//    }
+//    
+//    @Test
+//    public void testSameFuncIndices() {
+//        expectedEx.expect(IllegalArgumentException.class);
+//        expectedEx.expectMessage("Same function index already exists! Named: Donkey_i");
+//        db.cat.createIndex("Donkey_i", "Donkey", fields, Index.IndexType.BTREE); 
+//        for (Record r : db.cat.indices){
+//            String tst = r.getString("index_name");
+//            System.out.println(tst);
+//        }
+//        db.cat.createIndex("Donkey_g", "Donkey", fields, Index.IndexType.BTREE);
+//    }
     
-    @Test
-    public void testDeleteIndices() {
-        db.cat.createIndex("Donkey_", "Donkey", fields, Index.IndexType.BTREE);
-        db.cat.dropIndex("Donkey_");
-        db.cat.createIndex("Donkey_", "Donkey", fields, Index.IndexType.BTREE);
-    }
+//    @Test
+//    public void testDeleteIndices() {
+//        db.cat.createIndex("Donkey_", "Donkey", fields, Index.IndexType.BTREE);
+//        db.cat.dropIndex("Donkey_");
+//        db.cat.createIndex("Donkey_", "Donkey", fields, Index.IndexType.BTREE);
+//    }
 }

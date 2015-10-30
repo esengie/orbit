@@ -21,38 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package Root;
+package BufferManager;
 
-import BufferManager.BufferManager;
-import DiskSpaceManager.DiskSpaceManager;
-import SettingsAndMeta.Catalogue;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Shamil Garifullin <shamil.garifullin at mit.spbau>
  */
-public class Dbms {
+public class LRUCacheTest {
+    
+    LRUCache<Integer, Integer> lra;
+    
+    public LRUCacheTest() {
+    }
+    
+    @Before
+    public void setUp() {
+        lra = new LRUCache<>(5);
+    }
 
-    DiskSpaceManager disk;
-    public BufferManager buf;
-    public Catalogue cat;
-
-    public void create(String name){
-        disk.createDB(name);
-        cat.create();
+    @Test
+    public void testCapacity() {
+        Integer k = null;
+        for (int i = 0; i < 12; ++i){
+            k = new Integer(i);
+            lra.put(k, k);
+        }
+        assertTrue(lra.containsKey(11));
+        assertTrue(lra.containsKey(7));
+        lra.remove(8);
+        assertTrue(!lra.containsKey(8));
+        lra.put(12, 12);
+        assertTrue(lra.containsKey(7));
     }
-    public void open(String name){
-        disk.openDB(name);
-        cat.load();
-    }
-    public void close(){
-        buf.flushAll();
-        disk.closeDB();
-    }
-    public Dbms() {
-        disk = new DiskSpaceManager();
-        buf = new BufferManager(500);
-        buf.setManager(disk);
-        cat = new Catalogue(disk, buf);
-    }
+    
 }

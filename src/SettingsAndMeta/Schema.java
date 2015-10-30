@@ -85,7 +85,7 @@ public class Schema extends GlobalConsts implements Iterable<String> {
                 throw new IllegalArgumentException("Your varchar is too big, max = 128");
             }
             fields.put(name.toLowerCase(),
-                new AbstractMap.SimpleEntry<>("varchar" + maxSize, recordSize));
+                new AbstractMap.SimpleEntry<>("varchar" + maxSize, pos));
             return 2 * maxSize;
         }
     }

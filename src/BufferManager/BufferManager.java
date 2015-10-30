@@ -81,7 +81,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
             if (temp == 1) {
                 if (lru.size() > 0) {
                     Entry<Integer, Page> entry = lru.entrySet().iterator().next();
-                    if (lru.size() >= lru.capacity() - 1
+                    if (lru.removeEldestEntry(entry)
                             && dirty.get(entry.getKey())) {
                         diskManager.writePage(entry.getValue());
                         dirty.remove(entry.getKey());
@@ -93,6 +93,8 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 return;
             }
             pinCount.put(pageId, temp - 1);
+            throw new IllegalStateException("How in the hell did i get pincount more than 1? "
+                + String.valueOf(pageId));
         }
     }
 
@@ -101,11 +103,26 @@ public class BufferManager extends GlobalConsts {   ///singleton
             dirty.put(pageId, Boolean.TRUE);
         }
     }
+     public void unsetDirty(int pageId) {
+        if (dirty.containsKey(pageId)){
+            dirty.remove(pageId);
+        }
+        if (lru.containsKey(pageId)){
+            lru.remove(pageId);
+        }
+        if (lru.containsKey(pageId) || dirty.containsKey(pageId) || pageFrame.containsKey(pageId)){
+            throw new IllegalStateException("Wellllllllllll");
+        }
+    }
 
     public void flushAll() {
+        Page p = null;
         try {
             for (Entry<Integer, Boolean> elem : dirty.entrySet()) {
-                diskManager.writePage(lru.get(elem.getKey()));
+                p = lru.get(elem.getKey());
+//                if (p != null){
+                    diskManager.writePage(p);
+//                }
             }
         } catch (RuntimeException ex) {
             throw new RuntimeException("Well, error! (flushing buffer)");
@@ -113,18 +130,17 @@ public class BufferManager extends GlobalConsts {   ///singleton
     }
 
     public Page getPage(int pageId) {
-        if (lru.containsKey(pageId) || pageFrame.containsKey(pageId)) {
-            pin(pageId);
-            return pageFrame.get(pageId);
-        } else {
+        if (!lru.containsKey(pageId) && !pageFrame.containsKey(pageId)) {
             try {
-                pin(pageId);
                 Page temp = diskManager.readPage(pageId);
+                pinCount.put(pageId, 1);
                 pageFrame.put(pageId, temp);
-                return temp;
             } catch (RuntimeException ex) {
                 throw new RuntimeException("Well, error! (getting page) " + ex.getMessage());
             }
+        } else {
+            pin(pageId);
         }
+        return pageFrame.get(pageId);
     }
 }

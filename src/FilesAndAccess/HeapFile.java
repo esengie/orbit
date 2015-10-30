@@ -60,7 +60,6 @@ public class HeapFile implements Iterable<Record>{
         return new Scanner();
     }
     private class Scanner implements Iterator<Record>{
-        private final int recSize;
         private int curPid;
         private int curSid;
         private int prevPid;
@@ -68,7 +67,6 @@ public class HeapFile implements Iterable<Record>{
         private int notScanned;
         private boolean nexted = false;
         public Scanner(){
-            recSize = schema.getRecordSize();
             notScanned = myTotalRecs;
             
             curPid = myPartial;
@@ -83,20 +81,21 @@ public class HeapFile implements Iterable<Record>{
         @Override
         public Record next() {
             if(hasNext()) {
-                HeapPage p = new HeapPage(curPid, recSize, ptrBufM);
+                HeapPage p = getHeapPage(curPid);
                 if (p.getNextOccupiedSlot(curSid+1) == -1){
                     prevPid = curPid;
                     curPid = p.getNext();
                     if (curPid == myPartial){
-                        p = new HeapPage(myFull, recSize, ptrBufM);
+                        p = getHeapPage(myFull);
                         curPid = p.getNext();
                     }
                     if (curPid == myFull){
                         throw new IllegalStateException(
                                 "Somethings fucked up in an iterator at step "
-                                        + String.valueOf(myTotalRecs - notScanned));
+                                        + String.valueOf(myTotalRecs - notScanned) + 
+                                        " myTotalRecs is " + String.valueOf(myTotalRecs));
                     }
-                    p = new HeapPage(curPid, recSize, ptrBufM);
+                    p = getHeapPage(curPid);
                     prevSid = curSid;
                     curSid = p.getNextOccupiedSlot(0);
                 } else {
@@ -120,7 +119,7 @@ public class HeapFile implements Iterable<Record>{
                 Record tmp = new Record(schema);
                 tmp.setRid(curPid, curSid);
                 
-                HeapPage p = new HeapPage(curPid, recSize, ptrBufM);
+                HeapPage p = getHeapPage(curPid);
                 p.deleteRecord(tmp.getRid());
                 metaPage.setTotalRecs(--myTotalRecs);
 
@@ -199,6 +198,8 @@ public class HeapFile implements Iterable<Record>{
             movePage(myPartial, rid.pid);
         } else {
             if (p.getOccupiedSlotsNum() == 0){
+                wipeFromList(rid.pid);
+                ptrBufM.unsetDirty(rid.pid);
                 ptrDSM.deallocatePage(rid.pid);
             }
         }
@@ -207,19 +208,26 @@ public class HeapFile implements Iterable<Record>{
     private void claimSpace(){
         
     }
-    private void movePage(int to, int pid){
-        HeapPage toP = getHeapPage(to);
+    private HeapPage wipeFromList(int pid){
         HeapPage moved = getHeapPage(pid);
-        
         HeapPage tmp = getHeapPage(moved.getNext());
         tmp.setPrev(moved.getPrev());
         tmp = getHeapPage(moved.getPrev());
         tmp.setNext(moved.getNext());
         
+        return moved;
+    }
+    private void movePage(int to, int pid){
+        HeapPage toP = getHeapPage(to);
+        
+        HeapPage moved = wipeFromList(pid);
         moved.setNext(toP.getNext());
         moved.setPrev(to);
         
         toP.setNext(pid);
+        if (toP.getPrev() == to){
+            toP.setPrev(pid);
+        }
     }
     public void destroy() {
         HeapPage iter = getHeapPage(myFull);
@@ -227,16 +235,21 @@ public class HeapFile implements Iterable<Record>{
         while (myFull != iter.getNext()){
             tmp = getHeapPage(iter.getNext());
             iter.setNext(tmp.getNext());
+            ptrBufM.unsetDirty(tmp.pid);
             ptrDSM.deallocatePage(tmp.pid);
         }        
         iter = getHeapPage(myPartial);
         while (myPartial != iter.getNext()){
             tmp = getHeapPage(iter.getNext());
             iter.setNext(tmp.getNext());
+            ptrBufM.unsetDirty(tmp.pid);
             ptrDSM.deallocatePage(tmp.pid);
         }
+        ptrBufM.unsetDirty(myFull);
         ptrDSM.deallocatePage(myFull);
+        ptrBufM.unsetDirty(myPartial);
         ptrDSM.deallocatePage(myPartial);
+        ptrBufM.unsetDirty(metaPage.pid);
         ptrDSM.deallocatePage(metaPage.pid);
     }
 }

@@ -112,10 +112,8 @@ public class Catalogue extends GlobalConsts {
                         + rec.getString(c_indexName));
             }
         }
-        Schema sche = new Schema();///////////////////////
-        sche.createCharField("asd", 12);/////////////////////
         // Oh hey, a useful line!
-        HeapFile self = createTable(indexName, sche);//new Schema());
+        HeapFile self = createTable(indexName, new Schema());
         
         // ..more of maintenance
         Record rec = new Record(i_schema);
@@ -149,6 +147,9 @@ public class Catalogue extends GlobalConsts {
                 tableName = item.getString(c_tableName);
                 break;
             }
+        }
+        if (tableName.equals("")){
+            throw new IllegalArgumentException("No such Index! " + indexName);
         }
         return createHelper(type, self, fields, getTable(tableName));
     }
@@ -227,7 +228,14 @@ public class Catalogue extends GlobalConsts {
         for (Record.Rid rid : rids) {
             attributes.deleteRecord(rid);
         }
-        
+        ////////////////////////////////////////////
+        for (Record rec : attributes) {
+            String tst = rec.getString(c_tableName);
+            if (tst.equals(name)) {
+                throw new IllegalStateException("delete record is wrong");
+            }
+        }
+        /////////////////////////////////////////////
         List<String> ind = new ArrayList<>();
         for (Record rec : indices){
             String tst = rec.getString(c_tableName);
@@ -236,7 +244,6 @@ public class Catalogue extends GlobalConsts {
             }
         }
         for (String nm : ind) {
-//            System.out.println(nm);
             dropIndex(nm);
         }
     }

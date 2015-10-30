@@ -42,7 +42,6 @@ public class DiskSpaceManager extends GlobalConsts {
     private Page fPage;       // info page
 
     public int allocatePage() {
-        // doesn't care about prev, maybe fix later
         if (mSize < DBMS_FILE_MAX_SIZE || freePages > 0) {
             int ret = 0;
             try {
@@ -161,6 +160,7 @@ public class DiskSpaceManager extends GlobalConsts {
             fPage.setInt(FREE_PAGES, 0);
             fPage.setInt(M_SIZE, 1);
             writePage(fPage);
+            openDB(f);
         } catch (IOException except) {
             throw new RuntimeException("Well, error! (creating db)");
         }

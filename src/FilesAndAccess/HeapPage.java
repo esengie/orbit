@@ -40,6 +40,7 @@ public class HeapPage extends GlobalConsts{
     protected final int pid;
     private final int recordSize;
     private final int slotsPosition;
+    private final int numberOfSlots;
     private final BitSet slots;
     private int free;
     
@@ -52,14 +53,14 @@ public class HeapPage extends GlobalConsts{
         Page p = buf.getPage(pid);
         free = p.getFree();
         // + 1 because need to store this bitset also. -1 just to have enough space
-        int number_of_slots = (p.getSize() - Page.page_offset) * 8 / (8 * recordSize + 1) - 1; 
+        numberOfSlots = (p.getSize() - Page.page_offset) * 8 / (8 * recordSize + 1) - 1; 
         // -1 to not hav buffer overflow
-        slotsPosition = p.getSize() - (number_of_slots + 7) / 8 - 1;
+        slotsPosition = p.getSize() - (numberOfSlots + 7) / 8 - 1;
         p.buff.position(slotsPosition);
         
         ByteBuffer buftmp = p.buff.duplicate();
         // not - 7, because we could have more bits than we have memory
-        buftmp.limit (buftmp.position() + (number_of_slots + 7) / 8); 
+        buftmp.limit (buftmp.position() + (numberOfSlots + 7) / 8); 
         slots = BitSet.valueOf(buftmp);
         
         buf.setDirty(pid);
@@ -69,8 +70,8 @@ public class HeapPage extends GlobalConsts{
     // maybe in construtor with if deleted?
     public void create(){
         Page p = buf.getPage(pid);
-        
-        free -= p.getSize() - slotsPosition;
+        // Тут уже учтено минус offset
+        free = numberOfSlots * recordSize;
         p.commitFree(free);
         
         slots.clear();
@@ -88,7 +89,7 @@ public class HeapPage extends GlobalConsts{
         rec.buff.position(0);
         p.buff.put(rec.buff);
         free -= recordSize;
-        slots.flip(i);
+        slots.set(i);
         p.commitFree(free);
         commitBits(p);
         
@@ -118,7 +119,7 @@ public class HeapPage extends GlobalConsts{
         p.buff.position(Page.page_offset + recordSize * rid.sid);
         p.buff.put(b);
         
-        slots.flip(rid.sid);
+        slots.clear(rid.sid);
         free += recordSize;
         p.commitFree(free);
         commitBits(p);
@@ -146,12 +147,12 @@ public class HeapPage extends GlobalConsts{
         Page p = buf.getPage(pid);
         
         p.buff.position(Page.page_offset + recordSize * pos);
-//        rec.setRid(p.getId(), i);
+        rec.setRid(p.getId(), pos);
         rec.buff.position(0);
         p.buff.put(rec.buff);
-        free -= recordSize;
-        slots.flip(pos);
-        p.commitFree(free);
+//        free -= recordSize;
+        slots.set(pos);
+//        p.commitFree(free);
         commitBits(p);
         
         buf.setDirty(pid);

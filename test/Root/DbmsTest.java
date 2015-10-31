@@ -77,13 +77,14 @@ public class DbmsTest {
         struc.createField("lap", "Int");
         db.create("atari.txt");
         db.cat.createTable("Donkey", struc);
-        db.disk.closeDB();
+        // Кидает почему-то тут
+        db.close();
     }
     
     @AfterClass
     public static void tearDownClass() {
         db.open("atari.txt");
-        db.disk.deleteDB();
+        db.delete();
     }
     
     @Before

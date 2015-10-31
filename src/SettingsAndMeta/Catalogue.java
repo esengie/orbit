@@ -228,14 +228,6 @@ public class Catalogue extends GlobalConsts {
         for (Record.Rid rid : rids) {
             attributes.deleteRecord(rid);
         }
-        ////////////////////////////////////////////
-        for (Record rec : attributes) {
-            String tst = rec.getString(c_tableName);
-            if (tst.equals(name)) {
-                throw new IllegalStateException("delete record is wrong");
-            }
-        }
-        /////////////////////////////////////////////
         List<String> ind = new ArrayList<>();
         for (Record rec : indices){
             String tst = rec.getString(c_tableName);

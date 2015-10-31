@@ -23,10 +23,8 @@
  */
 package BufferManager;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import java.util.Map.Entry;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -59,6 +57,8 @@ public class LRUCacheTest {
         assertTrue(!lra.containsKey(8));
         lra.put(12, 12);
         assertTrue(lra.containsKey(7));
+        Entry<Integer,Integer> r = lra.entrySet().iterator().next();
+//        System.out.println(r.getKey());
     }
     
 }

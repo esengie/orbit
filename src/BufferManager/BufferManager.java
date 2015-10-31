@@ -82,6 +82,16 @@ public class BufferManager extends GlobalConsts {   ///singleton
         if (pinCount.containsKey(pageId)) {
             Integer temp = pinCount.get(pageId);
             if (temp == 1) {
+                Page p = pageFrame.get(pageId);
+                if (p.getDeleted()){
+                    diskManager.writePage(p);
+                    if (dirty.containsKey(pageId)){
+                        dirty.remove(pageId);
+                    }
+                    pinCount.remove(pageId);
+                    pageFrame.remove(pageId);
+                    return;
+                }
                 if (lru.size() > 0) {
                     Entry<Integer, Page> entry = lru.entrySet().iterator().next();
                     if (lru.removeEldestEntry(entry)
@@ -91,13 +101,8 @@ public class BufferManager extends GlobalConsts {   ///singleton
                     }
                 }
                 pinCount.remove(pageId);
-                Page p = pageFrame.get(pageId);
                 pageFrame.remove(pageId);
-                if (p.getDeleted()){
-                    diskManager.writePage(p);
-                } else {
-                    lru.put(pageId, p);
-                }
+                lru.put(pageId, p);
                 return;
             }
             pinCount.put(pageId, temp - 1);  
@@ -116,7 +121,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
         int i = -1;
         try {
             for (Entry<Integer, Boolean> elem : dirty.entrySet()) {
-                i = elem.getKey();
+                if (elem.getValue() == false) continue;
                 p = lru.get(elem.getKey());
                 if (p == null){
                     throw new RuntimeException("Well, error! (flushing buffer)");

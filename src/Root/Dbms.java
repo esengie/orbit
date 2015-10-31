@@ -49,6 +49,10 @@ public class Dbms {
         buf.flushAll();
         disk.closeDB();
     }
+    public void delete(){
+        buf.flushAll();
+        disk.deleteDB();
+    }
     public Dbms(int sz) {
         disk = new DiskSpaceManager();
         buf = new BufferManager(sz);

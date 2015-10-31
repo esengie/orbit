@@ -68,18 +68,18 @@ public class Bits {
         raw = new boolean[raw.length];
     }
     public int nextClearBit(int i){
-        while(i < raw.length && raw[i] != true){
+        while(i < raw.length && raw[i] != false){
             ++i;
         }
-        if (i == raw.length)
+        if (i >= raw.length)
             return -1;
         return i;
     }
     public int nextSetBit(int i){
-        while(i < raw.length && raw[i] == true){
+        while(i < raw.length && raw[i] != true){
             ++i;
         }
-        if (i == raw.length)
+        if (i >= raw.length)
             return -1;
         return i;
     }

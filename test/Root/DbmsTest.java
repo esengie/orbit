@@ -68,7 +68,7 @@ public class DbmsTest {
     
     @BeforeClass
     public static void setUpClass() {
-        db = new Dbms();
+        db = new Dbms(12);
         struc = new Schema();
         struc.createField("fap", "int");
         struc.createCharField("mishap", 120);
@@ -96,16 +96,16 @@ public class DbmsTest {
     
     @After
     public void tearDown() {
-//        db.cat.dropTable("Donkey");
-//        db.cat.createTable("Donkey", struc);
-//        db.close();
+        db.cat.dropTable("Donkey");
+        db.cat.createTable("Donkey", struc);
+        db.close();
     }
     
     /**
      * Test of create heapfile iterate and remove.
      */
     @Test
-    public void testCreate() {
+    public void testInsert() {
         for (Integer i = 0; i < 1000; ++i) {
             Record rec = new Record(struc);
             rec.putInt("fap", i);
@@ -113,24 +113,73 @@ public class DbmsTest {
             rec.putString("mishap", "asdas");
             any.insertRecord(rec);
         }
-        Iterator<Record> it = any.iterator();
-        while(it.hasNext()) {
-            it.next();
-            it.remove();
+        Set set = new HashSet();
+        for (Record rec : any){
+            set.add(rec.getInt("fap"));
+            assertTrue("asdas".equals(rec.getString("mishap")));
         }
-        for (Integer i = 0; i < 15; ++i) {
+        assertEquals(1000, set.size());
+    }
+    @Test
+    public void test2Insert_drop() {
+        for (Integer i = 0; i < 1000; ++i) {
+            Record rec = new Record(struc);
+            rec.putInt("fap", 2*i);
+            rec.putInt("lap", 0);
+            rec.putString("mishap", "asdas");
+            any.insertRecord(rec);
+        }
+        Set set = new HashSet();
+        for (Record rec : any){
+            set.add(rec.getInt("fap"));
+            assertTrue("asdas".equals(rec.getString("mishap")));
+        }
+        assertEquals(1000, set.size());
+    }
+    @Test
+    public void testRemove() {
+        ArrayList<Record> ll = new ArrayList<>();
+        for (Integer i = 0; i < 1000; ++i) {
+            Record rec = new Record(struc);
+            rec.putInt("fap", i);
+            rec.putInt("lap", 0);
+            rec.putString("mishap", "asdas");
+            any.insertRecord(rec);
+            ll.add(rec);
+        }
+        for (Record r : ll){
+            any.deleteRecord(r.getRid());
+        }
+        for (Integer i = 0; i < 1000; ++i) {
             Record rec = new Record(struc);
             rec.putInt("fap", i);
             rec.putInt("lap", 0);
             rec.putString("mishap", "asdas");
             any.insertRecord(rec);
         }
-        Record rec = new Record(struc);
-        rec.putInt("fap", 1111);
-        rec.putInt("lap", 0);
-        rec.putString("mishap", "asdas");
-        any.insertRecord(rec);
     }
+//    @Test
+//    public void testRemoveIter() {
+//        for (Integer i = 0; i < 1000; ++i) {
+//            Record rec = new Record(struc);
+//            rec.putInt("fap", i);
+//            rec.putInt("lap", 0);
+//            rec.putString("mishap", "asdas");
+//            any.insertRecord(rec);
+//        }
+//        Iterator<Record> it = any.iterator();
+//        while(it.hasNext()) {
+//            it.next();
+//            it.remove();
+//        }
+//        for (Integer i = 0; i < 1000; ++i) {
+//            Record rec = new Record(struc);
+//            rec.putInt("fap", i);
+//            rec.putInt("lap", 0);
+//            rec.putString("mishap", "asdas");
+//            any.insertRecord(rec);
+//        }
+//    }
 //
 //    
 //    @Test

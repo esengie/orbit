@@ -70,7 +70,7 @@ public class HeapPage extends GlobalConsts{
         
         buf.setDirty(pid);
         buf.unpin(pid);
-    }    
+    }
     // Need this bc of memory in/out to create init BitSet
     // maybe in construtor with if deleted?
     public void create(){
@@ -91,7 +91,12 @@ public class HeapPage extends GlobalConsts{
         int i = slots.nextClearBit(0);
         
         if (i == -1){
+            buf.unpin(pid);
             throw new IllegalStateException("Weird..shouldn't insert records bigger than allowed");
+        }
+        if (i > numberOfSlots){
+            buf.unpin(pid);
+            throw new IllegalStateException("Sid is too big!");
         }
         
         p.buff.position(Page.page_offset + recordSize * i);
@@ -111,7 +116,12 @@ public class HeapPage extends GlobalConsts{
         Record r = new Record(struc);
         Page p = buf.getPage(pid);
         r.setRid(rid.pid, rid.sid);
-
+        
+        if (rid.sid > numberOfSlots){
+            buf.unpin(pid);
+            throw new IllegalArgumentException("Sid is too big!");
+        }
+        
         p.buff.position(Page.page_offset + recordSize * rid.sid);
 
         ByteBuffer buftmp = p.buff.duplicate();
@@ -126,6 +136,7 @@ public class HeapPage extends GlobalConsts{
         Page p = buf.getPage(pid);
         
         if (rid.sid > numberOfSlots){
+            buf.unpin(pid);
             throw new IllegalArgumentException("Sid is too big!");
         }
         
@@ -165,10 +176,9 @@ public class HeapPage extends GlobalConsts{
         rec.buff.position(0);
         p.buff.put(rec.buff);
 //        free -= recordSize;
-        slots.set(pos);
+//        slots.set(pos);
 //        p.commitFree(free);
-        commitBits(p);
-        
+//        commitBits(p);
         buf.setDirty(pid);
         buf.unpin(pid);
     }
@@ -199,7 +209,7 @@ public class HeapPage extends GlobalConsts{
     }
     public boolean getDeleted(){
         Page p = buf.getPage(pid);
-        // На самом деле пофиг в каком порядке анпиним, все же ожнопоточное
+        // На самом деле пофиг в каком порядке анпиним, все же однопоточное
         boolean res = p.getDeleted();
         buf.unpin(pid);
         return res;

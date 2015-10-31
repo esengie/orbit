@@ -91,8 +91,13 @@ public class BufferManager extends GlobalConsts {   ///singleton
                     }
                 }
                 pinCount.remove(pageId);
-                lru.put(pageId, pageFrame.get(pageId));
+                Page p = pageFrame.get(pageId);
                 pageFrame.remove(pageId);
+                if (p.getDeleted()){
+                    diskManager.writePage(p);
+                } else {
+                    lru.put(pageId, p);
+                }
                 return;
             }
             pinCount.put(pageId, temp - 1);  

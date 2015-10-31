@@ -49,9 +49,9 @@ public class Dbms {
         buf.flushAll();
         disk.closeDB();
     }
-    public Dbms() {
+    public Dbms(int sz) {
         disk = new DiskSpaceManager();
-        buf = new BufferManager(500);
+        buf = new BufferManager(sz);
         buf.setManager(disk);
         cat = new Catalogue(disk, buf);
     }

@@ -68,7 +68,6 @@ public class HeapPage extends GlobalConsts{
             throw new IllegalStateException(String.valueOf(slots.length()) + " " + String.valueOf(numberOfSlots));
         }
         
-        buf.setDirty(pid);
         buf.unpin(pid);
     }
     // Need this bc of memory in/out to create init BitSet
@@ -96,7 +95,7 @@ public class HeapPage extends GlobalConsts{
         }
         if (i > numberOfSlots){
             buf.unpin(pid);
-            throw new IllegalStateException("Sid is too big!");
+            throw new IllegalStateException("Sid is too big! Should be impossible");
         }
         
         p.buff.position(Page.page_offset + recordSize * i);
@@ -217,7 +216,6 @@ public class HeapPage extends GlobalConsts{
     public void setDeleted(){
         Page p = buf.getPage(pid);
         p.setDeleted();
-        buf.setDirty(pid);
         buf.unpin(pid);
     }
     public void clearDeleted(){

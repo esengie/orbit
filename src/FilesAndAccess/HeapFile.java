@@ -197,7 +197,7 @@ public class HeapFile implements Iterable<Record>{
             movePage(myPartial, rid.pid);
         } else {
             if (p.getOccupiedSlotsNum() == 0){
-                wipeFromList(rid.pid);
+                p = wipeFromList(rid.pid);
                 p.setDeleted();
             }
         }
@@ -219,22 +219,23 @@ public class HeapFile implements Iterable<Record>{
     }
     private void movePage(int to, int pid){
         HeapPage toP = getHeapPage(to);
+        HeapPage nexto = getHeapPage(toP.getNext());
         
         HeapPage moved = wipeFromList(pid);
         moved.setNext(toP.getNext());
         moved.setPrev(to);
         
         toP.setNext(pid);
-        if (toP.getPrev() == to){
-            toP.setPrev(pid);
-        }
+        nexto.setPrev(pid);
     }
     public void destroy() {
         HeapPage iter = getHeapPage(myFull);
         HeapPage tmp;
         while (myFull != iter.getNext()){
-            tmp = getHeapPage(iter.getNext());
+            int tt = iter.getNext();
+            tmp = getHeapPage(tt);
             iter.setNext(tmp.getNext());
+//            tmp.setNext(tt);
             tmp.setDeleted();
         }        
         iter = getHeapPage(myPartial);

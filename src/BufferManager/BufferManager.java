@@ -80,7 +80,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
 
     public void unpin(int pageId) {
         if (pinCount.containsKey(pageId)) {
-            Integer temp = pinCount.get(pageId);
+            int temp = pinCount.get(pageId);
             if (temp == 1) {
                 Page p = pageFrame.get(pageId);
                 if (p.getDeleted()){
@@ -94,10 +94,11 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 }
                 if (lru.size() > 0) {
                     Entry<Integer, Page> entry = lru.entrySet().iterator().next();
-                    if (lru.removeEldestEntry(entry)
+                    if (dirty.containsKey(entry.getKey()) && lru.size() == lru.capacity()
                             && dirty.get(entry.getKey())) {
-                        diskManager.writePage(entry.getValue());
                         dirty.remove(entry.getKey());
+                        diskManager.writePage(entry.getValue());
+                        lru.remove(entry.getKey());
                     }
                 }
                 pinCount.remove(pageId);
@@ -114,6 +115,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
         if (pageFrame.containsKey(pageId)) {
             dirty.put(pageId, Boolean.TRUE);
         }
+        
     }
 
     public void flushAll() {
@@ -124,6 +126,7 @@ public class BufferManager extends GlobalConsts {   ///singleton
                 if (elem.getValue() == false) continue;
                 p = lru.get(elem.getKey());
                 if (p == null){
+                    i = elem.getKey();
                     throw new RuntimeException("Well, error! (flushing buffer)");
                 }
                 diskManager.writePage(p);
@@ -132,6 +135,10 @@ public class BufferManager extends GlobalConsts {   ///singleton
             throw new RuntimeException("Flushing buffer error, no page in lru with number "
                     + String.valueOf(i) + " (is it pinned?)" + String.valueOf(pageFrame.containsKey(i)));
         }
+        dirty.clear();
+        lru.clear();
+        pageFrame.clear();
+        pinCount.clear();
     }
 
     public Page getPage(int pageId) {

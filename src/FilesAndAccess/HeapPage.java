@@ -41,7 +41,7 @@ public class HeapPage extends GlobalConsts{
     private final int recordSize;
     private final int slotsPosition;
     private final int numberOfSlots;
-    private final Bits slots;
+    private Bits slots;
     private int free;
     
     BufferManager buf;

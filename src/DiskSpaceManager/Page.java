@@ -65,7 +65,7 @@ public class Page extends GlobalConsts {
         return getInt(PAGE_NEXT);
     }
     public void commitFree(int free){
-        if (free > PAGE_SIZE){
+        if (free > PAGE_SIZE - page_offset){
             throw new IllegalStateException("Free is too big");
         }
         setInt(PAGE_FREE, free);
